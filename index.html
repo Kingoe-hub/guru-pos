@@ -1,122 +1,345 @@
 <!doctype html>
 <html lang="en-ZM">
 <head>
-<script>if(localStorage.getItem('GURU_ACTIVATED')!=='true'){location.replace('./license.html');}</script>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a2240"><title>GURU POS — Boss LIVE</title>
-<link rel="manifest" href="./manifest.json">
-<script src="license.js"></script>
-<script>verifyStoredLicense().then(o=>{if(!o){try{localStorage.removeItem('GURU_ACTIVATED')}catch(e){}location.replace('./license.html');}});</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const SUPABASE_URL = 'https://xqjxpnzgwrqulqvhpnts.supabase.co';
-const SUPABASE_KEY = 'sb_publishable__osC2SU7QjPAu_Z5jwWqDA_TdlX-AF8';
-let supabaseClient=null; try{supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY); console.log('GURU LIVE READY');}catch(e){}
+(function(){})();
+if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./license.html'); }
 </script>
-<style>
-:root{--navy:#0a2240;--orange:#f97316;--green:#16a34a;--red:#dc2626;--line:#e2e8f0;--bg:#f3f4f6}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,sans-serif;color:#172033;padding-bottom:72px}button,input,select{font:inherit}button{cursor:pointer;border:0}
-#bossLogin{position:fixed;inset:0;z-index:9999;background:#0a0f1c;display:flex;align-items:center;justify-content:center;padding:20px}
-.bossCard{background:#111827;border:1px solid #1f2937;border-radius:20px;width:min(92vw,400px);padding:24px;color:#fff}
-.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.role-btn{padding:14px;border-radius:14px;background:#1f2937;color:#9ca3af;border:2px solid transparent}.role-btn.active{background:#0a2240;border-color:#4ade80;color:#fff}
-.boss-input{width:100%;padding:12px;border-radius:12px;background:#1f2937;border:1px solid #374151;color:#fff;margin:6px 0 12px}.login-btn{width:100%;padding:14px;border-radius:12px;background:#4ade80;color:#000;font-weight:900;font-size:16px;margin-top:10px}
-.appbar{background:var(--navy);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}.brand{font-weight:900}.brand span{color:#fb923c}.sub{font-size:11px;color:#cbd5e1}.layout{max-width:1500px;margin:auto;display:grid;grid-template-columns:210px 1fr 320px;min-height:calc(100vh - 58px)}.sidebar{background:var(--navy);color:#fff;padding:16px;display:flex;flex-direction:column;gap:8px}.navbtn{padding:11px 12px;border-radius:10px;background:transparent;color:#dbeafe;text-align:left}.navbtn.active,.navbtn:hover{background:var(--orange);color:#fff}.sidebar .totals{margin-top:auto;background:#ffffff12;border-radius:12px;padding:12px}.main{padding:18px;min-width:0}.cartpanel{background:#fff;border-left:1px solid var(--line);padding:16px;display:flex;flex-direction:column;max-height:calc(100vh - 58px);position:sticky;top:58px}.heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.search{max-width:280px;width:45%;padding:10px 14px;border:1px solid var(--line);border-radius:999px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.product,.panel,.metric{background:#fff;border:1px solid #edf0f4;border-radius:15px;padding:14px}.price{font-size:19px;font-weight:900;color:var(--orange)}.small{font-size:12px;color:#9ca3af}.pill{font-size:11px;border-radius:99px;padding:4px 8px;background:#f1f5f9}.pill.low{background:#fee2e2;color:#991b1b}.btn{padding:10px 13px;border-radius:10px;font-weight:750}.primary{background:var(--navy);color:#fff}.orange{background:var(--orange);color:#fff}.green{background:var(--green);color:#fff}.red{background:var(--red);color:#fff}.light{background:#f1f5f9}.full{width:100%}.field{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;margin:4px 0 8px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.formgrid .wide{grid-column:1/-1}.section{margin-bottom:14px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.listrow{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.hidden{display:none!important}.bottomnav{display:none}.modal{border:0;border-radius:16px;padding:18px;width:min(92vw,420px)}.modal::backdrop{background:#0008}.live-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.live-on{background:#22c55e;box-shadow:0 0 8px #22c55e}.live-off{background:#ef4444}
-@media(max-width:650px){.layout{display:block}.sidebar{display:none}.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--navy);display:flex;justify-content:space-around;padding:7px 2px;z-index:10}.bottomnav button{background:transparent;color:#b7c5d8;display:flex;flex-direction:column;align-items:center;flex:1;font-size:10px}.bottomnav button.active{color:#fff}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a2240">
+  <meta name="description" content="GURU POS sales, stock, reporting and debt book. Boss Version">
+  <title>GURU POS — Boss Version Live Sync</title>
+  <link rel="manifest" href="./manifest.json">
+  <script src="license.js"></script>
+  <script>verifyStoredLicense().then(function(ok){ if(!ok){ try{localStorage.removeItem('GURU_ACTIVATED')}catch(e){} location.replace('./license.html'); } });</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  const SUPABASE_URL = 'https://xqjxpnzgwrqulqvhpnts.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable__osC2SU7QjPAu_Z5jwWqDA_TdlX-AF8';
+  let supabaseClient=null;
+  try{ supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
+  async function pushToCloud(type,payload){
+    if(!supabaseClient) return;
+    const shopId=localStorage.getItem('guru_shopId');
+    if(!shopId) return;
+    try{ await supabaseClient.from('guru_sync').insert({shop_id: shopId, type: type, payload: payload}); }catch(err){}
+  }
+  </script>
+  <style>
+    :root{--navy:#0a2240;--orange:#f97316;--green:#16a34a;--red:#dc2626;--muted:#64748b;--line:#e2e8f0;--bg:#f3f4f6}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#172033;padding-bottom:72px}button,input,select{font:inherit}button{cursor:pointer;border:0}button:disabled{opacity:.45;cursor:not-allowed}
+    #bossLogin{position:fixed;inset:0;z-index:9999;background:#0a0f1c;display:flex;align-items:center;justify-content:center;padding:20px}
+    .bossCard{background:#111827;border:1px solid #1f2937;border-radius:20px;width:min(92vw,400px);padding:24px;color:#fff}
+    .bossCard h2{margin:0 0 4px;font-weight:900}.bossCard h2 span{color:#4ade80}
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+    .role-btn{padding:14px;border-radius:14px;background:#1f2937;color:#9ca3af;text-align:center;border:2px solid transparent}
+    .role-btn.active{background:#0a2240;border-color:#4ade80;color:#fff}
+    .boss-input{width:100%;padding:12px 14px;border-radius:12px;background:#1f2937;border:1px solid #374151;color:#fff;margin:6px 0 12px}
+    .qr-btn{padding:12px;border-radius:12px;background:transparent;border:1.5px dashed #4ade80;color:#4ade80}
+    .login-btn{width:100%;padding:14px;border-radius:12px;background:#4ade80;color:#000;font-weight:900;font-size:16px;margin-top:10px;border:0}
+    .appbar{background:var(--navy);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}.brand{font-weight:900;letter-spacing:.3px}.brand span{color:#fb923c}.sub{font-size:11px;color:#cbd5e1}.layout{max-width:1500px;margin:auto;display:grid;grid-template-columns:210px minmax(0,1fr) 320px;min-height:calc(100vh - 58px)}.sidebar{background:var(--navy);color:#fff;padding:16px;display:flex;flex-direction:column;gap:8px}.navbtn{padding:11px 12px;border-radius:10px;background:transparent;color:#dbeafe;text-align:left}.navbtn.active,.navbtn:hover{background:var(--orange);color:#fff}.sidebar .totals{margin-top:auto;background:#ffffff12;border-radius:12px;padding:12px}.main{padding:18px;min-width:0}.cartpanel{background:#fff;border-left:1px solid var(--line);padding:16px;display:flex;flex-direction:column;max-height:calc(100vh - 58px);position:sticky;top:58px}.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.heading h1{font-size:23px;margin:0}.search{max-width:280px;width:45%;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:#fff}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.product,.panel,.metric{background:#fff;border:1px solid #edf0f4;border-radius:15px;padding:14px;box-shadow:0 2px 8px #0f172a08}.product{display:flex;flex-direction:column;gap:8px}.product h3{margin:0;font-size:15px;overflow-wrap:anywhere}.price{font-size:19px;font-weight:900;color:var(--orange)}.small{font-size:12px;color:var(--muted)}.pill{font-size:11px;border-radius:99px;padding:4px 8px;background:#f1f5f9;display:inline-block}.pill.low{background:#fee2e2;color:#991b1b}.btn{padding:10px 13px;border-radius:10px;font-weight:750;font-size:13px}.primary{background:var(--navy);color:white}.orange{background:var(--orange);color:white}.green{background:var(--green);color:white}.red{background:var(--red);color:white}.light{background:#f1f5f9;color:#1e293b}.full{width:100%}.field{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;margin:4px 0 8px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.formgrid .wide{grid-column:1/-1}.section{margin-bottom:14px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.listrow{padding:12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}.listrow:last-child{border-bottom:0}.actions{display:flex;gap:6px;flex-wrap:wrap}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}.metric label{font-size:11px;color:var(--muted);display:block}.metric strong{font-size:20px;overflow-wrap:anywhere}.hidden{display:none!important}.empty{text-align:center;padding:30px;color:var(--muted)}.tablewrap{overflow:auto;background:#fff;border-radius:14px}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:11px;border-bottom:1px solid var(--line);white-space:nowrap}.table th{background:#f8fafc}.cartitems{overflow:auto;flex:1;min-height:100px}.cartline{padding:10px 0;border-bottom:1px solid var(--line)}.cartfooter{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.bottomnav{display:none}.notice{padding:10px 12px;border-radius:10px;background:#fff7ed;color:#9a3412;font-size:12px;margin-bottom:12px}.notice.ok{background:#f0fdf4;color:#166534}.good{color:#15803d}.bad{color:#b91c1c}.right{text-align:right}.muted{color:var(--muted)}.pricein{width:96px;padding:6px 8px;margin:0;text-align:right}.strike{text-decoration:line-through;opacity:.6}.modal{border:0;border-radius:16px;padding:18px;width:min(92vw,420px);box-shadow:0 20px 50px #0006}.modal::backdrop{background:#0008}.modal h3{margin:0 0 6px}.modal pre{white-space:pre-wrap;font:13px/1.4 ui-monospace,monospace;max-height:60vh;overflow:auto;margin:0 0 12px}.modal .actions{margin-top:8px}#printArea{display:none}
+    .live-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}.live-on{background:#22c55e;box-shadow:0 0 8px #22c55e}.live-off{background:#ef4444}
+    @media(max-width:1050px){.layout{grid-template-columns:175px minmax(0,1fr)}.cartpanel{display:none}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:650px){body{padding-bottom:70px}.appbar{padding:10px 12px}.layout{display:block;min-height:0}.sidebar{display:none}.main{padding:12px}.heading h1{font-size:20px}.search{width:52%;font-size:13px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.product{padding:11px}.product h3{font-size:13px}.price{font-size:17px}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:17px}.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--navy);display:flex;padding:7px 2px calc(7px + env(safe-area-inset-bottom));justify-content:space-around}.bottomnav button{background:transparent;color:#b7c5d8;display:flex;flex-direction:column;gap:3px;align-items:center;flex:1;font-size:10px}.bottomnav button.active{color:#fff}.bottomnav b{font-size:17px}.formgrid{gap:4px}.table{font-size:12px}.table th,.table td{padding:9px}.heading{align-items:flex-start}}
+    @media print{body{background:#fff;padding:0}body>*:not(#printArea){display:none!important}#printArea{display:block!important;font:13px/1.4 ui-monospace,monospace;white-space:pre-wrap;color:#000;margin:0}}
+  </style>
 </head>
 <body>
-<div id="bossLogin"><div class="bossCard">
-<h2>🛡️ GURU <span>POS</span></h2><div class="sub">Boss v4.1 LIVE • <span id="syncStatus"><span class="live-dot live-off"></span>Connecting</span></div>
-<p style="margin:16px 0 6px;font-weight:700">Select Role</p>
-<div class="role-grid"><button id="ownerBtn" class="role-btn active" onclick="window.setBossRole('owner')">👔<br><strong>Owner</strong></button><button id="cashierBtn" class="role-btn" onclick="window.setBossRole('cashier')">🧾<br><strong>Cashier</strong></button></div>
-<label class="small">Shop ID</label><input id="shopIdInput" class="boss-input" placeholder="SHOP-GURU-123">
-<div style="display:flex;gap:8px"><button class="btn light" style="flex:1;background:#374151;color:#fff" onclick="window.genShopIdNow()">🔄 Generate ID</button><button style="flex:1;padding:12px;border-radius:12px;background:transparent;border:1.5px dashed #4ade80;color:#4ade80">📷 Scan</button></div>
-<label class="small" style="margin-top:12px;display:block">PIN - 4 digits</label><input id="bossPin" class="boss-input" type="tel" maxlength="4" placeholder="1234">
-<button class="login-btn" onclick="window.doBossLoginNow()">Login →</button>
-</div></div>
-
-<header class="appbar"><div><div class="brand">GURU <span>POS</span> <small id="roleBadge" style="background:#f97316;padding:2px 8px;border-radius:20px;font-size:10px">BOSS</small></div><div class="sub"><span id="currentShopId"></span> • <span id="liveText">Connecting...</span></div></div><button class="btn orange" onclick="openCart()">Cart <span id="cartBadge">0</span></button></header>
-<div class="layout">
-<aside class="sidebar"><button class="navbtn active" data-page="sell" onclick="showPage('sell')">🛒 Sell</button><button class="navbtn" data-page="stock" onclick="showPage('stock')">📦 Stock</button><button class="navbtn" data-page="sales" onclick="showPage('sales')">📈 Sales</button><button class="navbtn" data-page="reports" onclick="showPage('reports')">📊 Reports</button><button class="navbtn" data-page="backup" onclick="showPage('backup')">💾 Backup</button>
-<div class="totals"><div class="small">Today</div><strong id="sideToday">K 0.00</strong><div class="small" style="margin-top:8px">Debt</div><strong id="sideDebt" style="color:#fca5a5">K 0.00</strong><div id="syncInfo" class="small" style="margin-top:10px">Sync init...</div></div></aside>
-<main class="main">
-<div class="heading"><h1 id="pageTitle">Sell</h1><input id="search" class="search" placeholder="Search…" oninput="renderProducts()"></div>
-<section id="page-sell"><div id="productGrid" class="cards"></div></section>
-<section id="page-stock" class="hidden"><div class="panel section"><h3>Add product</h3><form id="productForm" class="formgrid"><input class="field wide" id="pName" placeholder="Product name" required><input class="field" id="pCost" type="number" min="0" step="0.01" placeholder="Cost K" required><input class="field" id="pPrice" type="number" min="0.01" step="0.01" placeholder="Sell K" required><input class="field" id="pQty" type="number" min="0" step="1" placeholder="Qty" required><button class="btn primary" type="submit">Add</button></form></div><div class="panel"><div class="row"><h3>Inventory</h3><span id="stockCount" class="pill">0</span></div><div id="stockList"></div></div></section>
-<section id="page-sales" class="hidden"><div class="panel"><h3>Sales</h3><div id="salesList"></div></div></section>
-<section id="page-reports" class="hidden"><div class="panel"><h3>Reports</h3><div class="row"><span>Sales</span><strong id="rSales">K 0.00</strong></div><div class="row"><span>Profit</span><strong id="rProfit">K 0.00</strong></div></div></section>
-<section id="page-backup" class="hidden"><div class="panel"><h3>Backup</h3><button class="btn light" onclick="exportBackup()">Download</button><input id="restoreFile" type="file" class="field"><button class="btn red" onclick="restoreBackup()">Restore</button><div class="small" style="margin-top:8px">Shop: <span id="backupShop"></span></div><button class="btn light full" style="margin-top:12px" onclick="window.bossLogoutNow()">🚪 Logout</button></div></section>
-</main>
-<aside class="cartpanel"><div class="row"><h2>Cart</h2><span id="cartCount" class="pill">0</span></div><div id="cartItems" style="flex:1;overflow:auto"></div><div style="border-top:1px solid #e2e8f0;padding-top:12px"><div class="row"><strong>Total</strong><strong id="cartTotal">K 0.00</strong></div><input id="customerName" class="field" placeholder="Customer"><select id="payMethod" class="field"><option value="cash">Cash</option><option value="momo">MoMo</option><option value="bank">Bank</option></select><button class="btn primary full" onclick="checkout('sale')">Complete sale (Live Sync)</button><button class="btn light full" style="margin-top:6px" onclick="clearCart()">Clear</button></div></aside>
+<div id="bossLogin">
+  <div class="bossCard">
+    <h2>🛡️ GURU <span>POS</span></h2>
+    <div class="sub">Boss v4.1 LIVE SYNC • Zambia • <span id="loginLive"><span class="live-dot live-off"></span>Checking sync</span></div>
+    <p style="margin:16px 0 6px;font-weight:700">Select Role</p>
+    <div class="role-grid">
+      <button id="ownerBtn" class="role-btn active" onclick="window.setBossRole('owner')">👔<br><strong>Owner</strong><br><small>Full access</small></button>
+      <button id="cashierBtn" class="role-btn" onclick="window.setBossRole('cashier')">🧾<br><strong>Cashier</strong><br><small>Sell only</small></button>
+    </div>
+    <label class="small">Shop ID</label>
+    <input id="shopIdInput" class="boss-input" placeholder="SHOP-GURU-123">
+    <div style="display:flex;gap:8px">
+      <button class="btn light" style="flex:1;background:#374151;color:#fff" onclick="window.genShopIdNow()">🔄 Generate ID</button>
+      <button class="qr-btn" style="flex:1" onclick="alert('Boss Pro: QR Scan coming soon')">📷 Scan QR</button>
+    </div>
+    <label class="small" style="margin-top:12px;display:block">PIN - 4 digits only</label>
+    <input id="bossPin" class="boss-input" type="tel" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="e.g. 1234">
+    <button class="login-btn" onclick="window.doBossLoginNow()">Login →</button>
+    <p class="small" style="text-align:center;margin-top:12px;color:#9ca3af">Need help? WhatsApp Guru</p>
+    <button class="btn light full" style="margin-top:8px;background:#1f2937;color:#9ca3af" onclick="window.bossLogoutNow()">Log out / Switch shop</button>
+  </div>
 </div>
-<nav class="bottomnav"><button data-page="sell" class="active" onclick="showPage('sell')">🛒</button><button data-page="stock" onclick="showPage('stock')">📦</button><button data-page="sales" onclick="showPage('sales')">📈</button><button data-page="backup" onclick="showPage('backup')">⚙️</button></nav>
+<header class="appbar"><div><div class="brand" id="brandTop">GURU <span>POS</span> <small id="roleBadge" style="background:#f97316;padding:2px 8px;border-radius:20px;font-size:10px;margin-left:6px">BOSS</small></div><div class="sub" id="taglineTop">#YouNameItWeSuply · v4 Boss · <span id="currentShopId"></span> • <span id="liveText"><span class="live-dot live-off"></span>Offline</span></div></div><button class="btn orange" onclick="openCart()">Cart <span id="cartBadge">0</span></button></header>
+<div class="layout">
+  <aside class="sidebar"><div class="brand" style="margin:5px 8px 16px">GURU <span>POS</span></div>
+    <button class="navbtn active" data-page="sell" onclick="showPage('sell')">🛒 Sell</button><button class="navbtn" data-page="stock" onclick="showPage('stock')">📦 Stock</button><button class="navbtn" data-page="sales" onclick="showPage('sales')">📈 Sales</button><button class="navbtn" data-page="reports" onclick="showPage('reports')">📊 Reports</button><button class="navbtn" data-page="expenses" onclick="showPage('expenses')">💸 Expenses</button><button class="navbtn" data-page="debts" onclick="showPage('debts')">📒 Debt book</button><button class="navbtn" data-page="backup" onclick="showPage('backup')">💾 Backup & settings</button>
+    <div class="totals"><div class="small">Today's sales</div><strong id="sideToday">K 0.00</strong><div class="small" style="margin-top:8px">Outstanding debt</div><strong id="sideDebt" class="bad">K 0.00</strong><button class="btn light full" style="margin-top:12px" onclick="adminLogin()">🔒 Admin login</button><div id="adminLabel" class="sub" style="margin-top:6px">Customer mode</div><div id="syncInfo" class="sub" style="margin-top:8px">Sync: init...</div></div>
+  </aside>
+  <main class="main">
+    <div class="heading"><h1 id="pageTitle">Sell</h1><input id="search" class="search" placeholder="Search products…" oninput="renderProducts()"></div>
+    <div id="notice" class="notice"></div>
+    <section id="page-sell"><div id="productGrid" class="cards"></div></section>
+    <section id="page-stock" class="hidden">
+      <div class="panel section"><h3>Add product</h3><form id="productForm" class="formgrid"><input class="field wide" id="pName" placeholder="Product name" required maxlength="100"><input class="field" id="pCost" type="number" min="0" step="0.01" placeholder="Cost price (K)" required><input class="field" id="pPrice" type="number" min="0.01" step="0.01" placeholder="Selling price (K)" required><input class="field" id="pQty" type="number" min="0" step="1" placeholder="Opening quantity" required><button class="btn primary" type="submit">Add product</button></form></div>
+      <div class="panel"><div class="row"><h3>Inventory</h3><span id="stockCount" class="pill">0 products</span></div><div id="stockList"></div></div>
+    </section>
+    <section id="page-sales" class="hidden"><div class="panel section"><div class="row"><h3>Sales history</h3><button class="btn light" onclick="printSales()">Print list</button></div><div class="formgrid"><input id="salesFrom" class="field" type="date" onchange="salesLimit=50;renderSales()"><input id="salesTo" class="field" type="date" onchange="salesLimit=50;renderSales()"></div><div id="salesList"></div></div></section>
+    <section id="page-reports" class="hidden"><div class="panel section"><div class="row"><h3>Business report</h3><button class="btn orange" onclick="printReport()">Print report</button></div><select id="reportRange" class="field" onchange="renderReports()"><option value="today">Today</option><option value="week">Last 7 days</option><option value="month">This month</option><option value="all">All time</option><option value="custom">Custom dates</option></select><div id="repCustom" class="formgrid hidden"><input id="repFrom" class="field" type="date" onchange="renderReports()"><input id="repTo" class="field" type="date" onchange="renderReports()"></div><div class="metrics"><div class="metric"><label>Sales value</label><strong id="rSales">K 0.00</strong><div id="rCount" class="small">0 transactions</div></div><div class="metric"><label>Estimated profit</label><strong id="rProfit" class="good">K 0.00</strong><div id="rMargin" class="small">0% margin</div></div><div class="metric"><label>Expenses</label><strong id="rExp" class="bad">K 0.00</strong></div><div class="metric"><label>Net profit (after expenses)</label><strong id="rNet" class="good">K 0.00</strong></div><div class="metric"><label>Credit issued</label><strong id="rCredit" class="bad">K 0.00</strong></div><div class="metric"><label>Debt payments received</label><strong id="rDebtIn" class="good">K 0.00</strong></div></div></div>
+      <div class="panel section"><h3>Money in & out</h3><div id="receivedList"></div></div>
+      <div class="panel section"><h3>Best sellers</h3><div id="bestList"></div></div><div class="panel"><h3>Low stock (3 or fewer)</h3><div id="lowList"></div></div></section>
+    <section id="page-expenses" class="hidden"><div class="panel section"><h3>Add expense</h3><form id="expenseForm" class="formgrid"><select class="field" id="eCat"></select><input class="field" id="eAmount" type="number" min="0.01" step="0.01" placeholder="Amount (K)" required><select class="field" id="eMethod"><option value="cash">Paid by: Cash</option><option value="momo">Paid by: Mobile money</option><option value="bank">Paid by: Bank</option></select><input class="field" id="eDate" type="date"><input class="field wide" id="eNote" placeholder="Note" maxlength="80"><button class="btn primary" type="submit">Add expense</button></form></div>
+      <div class="panel"><div class="row"><h3>Expenses</h3><select id="expRange" class="field" style="width:auto;margin:0" onchange="renderExpenses()"><option value="month">This month</option><option value="today">Today</option><option value="week">Last 7 days</option><option value="all">All time</option></select></div><div id="expSummary" class="small" style="margin:8px 0"></div><div id="expList"></div></div></section>
+    <section id="page-debts" class="hidden"><div class="panel"><div class="row"><h3>Debt book</h3><button class="btn light" onclick="printDebts()">Print list</button></div><input id="debtSearch" class="field" placeholder="Search customer or phone" oninput="renderDebts()"><div id="debtSummary" class="small"></div><div id="debtList"></div></div></section>
+    <section id="page-backup" class="hidden">
+      <div class="panel section"><h3>Backup & restore</h3><p class="small">Live sync is ON - no need to share backup between same Shop ID.</p><div class="actions"><button class="btn primary" onclick="shareBackup()">Share / save backup</button><button class="btn light" onclick="exportBackup()">Download backup file</button><button class="btn light" onclick="exportSalesCSV()">Export sales CSV</button><button class="btn light" onclick="exportStockCSV()">Export stock CSV</button><button class="btn light" onclick="exportExpensesCSV()">Export expenses CSV</button></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><label class="small">Restore a GURU POS JSON backup</label><input id="restoreFile" type="file" accept="application/json,.json" class="field"><button class="btn red" onclick="restoreBackup()">Restore backup</button></div>
+      <div class="panel section"><h3>Shop settings</h3><form id="settingsForm" class="formgrid"><input class="field" id="sName" placeholder="Shop name" maxlength="40"><input class="field" id="sTagline" placeholder="Tagline" maxlength="60"><input class="field" id="sPhone" placeholder="Shop phone" maxlength="20"><input class="field" id="sFooter" placeholder="Receipt footer" maxlength="80"><button class="btn primary" type="submit">Save settings</button></form></div>
+      <div class="panel"><h3>Administration</h3><p id="adminHelp" class="small">Admin mode is locked.</p><div class="actions"><button class="btn light" onclick="adminLogin()">Admin login</button><button class="btn light" onclick="adminLogout()">Lock admin</button><button class="btn light" onclick="changePin()">Change PIN</button><button class="btn light" onclick="forgotPin()">Forgot PIN?</button><button class="btn red" onclick="clearAllData()">Clear all app data</button><button class="btn light" onclick="window.bossLogoutNow()">🚪 Boss Logout</button></div></div>
+    </section>
+  </main>
+  <aside class="cartpanel"><div class="row"><h2 style="margin:0">Cart</h2><span id="cartCount" class="pill">0 items</span></div><div id="cartItems" class="cartitems"></div><div class="cartfooter"><div class="row"><strong>Total</strong><strong id="cartTotal">K 0.00</strong></div><input id="customerName" class="field" placeholder="Customer name (optional)"><input id="customerPhone" class="field" placeholder="Phone / WhatsApp (optional)"><select id="payMethod" class="field" onchange="syncPay(this.value)"><option value="cash">Paid by: Cash</option><option value="momo">Paid by: Mobile money</option><option value="bank">Paid by: Bank</option></select><button class="btn primary full" onclick="checkout('sale')">Complete sale</button><button class="btn green full" style="margin-top:7px" onclick="checkout('whatsapp')">Sale + WhatsApp receipt</button><button class="btn red full" style="margin-top:7px" onclick="checkout('credit')">Record credit / debt</button><button class="btn light full" style="margin-top:7px" onclick="clearCart()">Clear cart</button></div></aside>
+</div>
+<nav class="bottomnav"><button data-page="sell" class="active" onclick="showPage('sell')"><b>🛒</b>Sell</button><button data-page="stock" onclick="showPage('stock')"><b>📦</b>Stock</button><button data-page="reports" onclick="showPage('reports')"><b>📊</b>Reports</button><button data-page="sales" onclick="showPage('sales')"><b>📈</b>Sales</button><button data-page="debts" onclick="showPage('debts')"><b>📒</b>Debts</button><button data-page="expenses" onclick="showPage('expenses')"><b>💸</b>Expenses</button><button data-page="backup" onclick="showPage('backup')"><b>⚙️</b>Settings</button></nav>
+<div id="cartOverlay" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:20" onclick="if(event.target===this)closeCart()"><div style="background:#fff;position:absolute;right:0;top:0;bottom:0;width:min(92%,420px);padding:16px;display:flex;flex-direction:column;overflow:auto"><div class="row"><h2>Cart</h2><button class="btn light" onclick="closeCart()">Close ✕</button></div><div id="mobileCartItems" class="cartitems"></div><div class="cartfooter"><div class="row"><strong>Total</strong><strong id="mobileCartTotal">K 0.00</strong></div><input id="mobileCustomerName" class="field" placeholder="Customer name"><input id="mobileCustomerPhone" class="field" placeholder="Phone / WhatsApp"><select id="mobilePayMethod" class="field" onchange="syncPay(this.value)"><option value="cash">Paid by: Cash</option><option value="momo">Paid by: Mobile money</option><option value="bank">Paid by: Bank</option></select><button class="btn primary full" onclick="checkout('sale')">Complete sale</button><button class="btn green full" style="margin-top:7px" onclick="checkout('whatsapp')">Sale + WhatsApp receipt</button><button class="btn red full" style="margin-top:7px" onclick="checkout('credit')">Record credit / debt</button><button class="btn light full" style="margin-top:7px" onclick="clearCart()">Clear cart</button></div></div></div>
 
 <script>
-window.BOSS_ROLE=localStorage.getItem('guru_role')||'owner';
-window.getDBKey=()=>{const s=localStorage.getItem('guru_shopId');return s?'guru_pos_v3_data_'+s:'guru_pos_v3_data';}
-window.setBossRole=r=>{window.BOSS_ROLE=r;document.getElementById('ownerBtn').classList.toggle('active',r==='owner');document.getElementById('cashierBtn').classList.toggle('active',r==='cashier');}
-window.genShopIdNow=()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let id='';for(let i=0;i<4;i++)id+=c[Math.floor(Math.random()*c.length)];const s='SHOP-GURU-'+id;document.getElementById('shopIdInput').value=s;return s;}
-window.doBossLoginNow=()=>{const shop=document.getElementById('shopIdInput').value.trim().toUpperCase();let pin=document.getElementById('bossPin').value.replace(/\D/g,'').slice(0,4);if(!shop||shop.length<6){alert('Enter Shop ID');return;}if(!/^\d{4}$/.test(pin)){alert('PIN 4 digits');return;}localStorage.setItem('guru_role',window.BOSS_ROLE);localStorage.setItem('guru_shopId',shop);localStorage.setItem('guru_pin',pin);document.getElementById('bossLogin').style.display='none';location.reload();}
-window.bossLogoutNow=()=>{if(confirm('Logout?')){localStorage.removeItem('guru_role');localStorage.removeItem('guru_shopId');location.reload();}}
-(function(){const r=localStorage.getItem('guru_role'),s=localStorage.getItem('guru_shopId');if(!r||!s){document.getElementById('bossLogin').style.display='flex';window.genShopIdNow();return;}document.getElementById('bossLogin').style.display='none';document.getElementById('currentShopId').textContent=s+' • '+r.toUpperCase();document.getElementById('roleBadge').textContent=r.toUpperCase();document.getElementById('backupShop').textContent=s;})();
+window.BOSS_ROLE = localStorage.getItem('guru_role') || 'owner';
+window.getDBKey = function(){ const shop = localStorage.getItem('guru_shopId'); return shop ? 'guru_pos_v3_data_' + shop : 'guru_pos_v3_data'; }
+window.setBossRole = function(r){
+  window.BOSS_ROLE = r;
+  const o=document.getElementById('ownerBtn'), c=document.getElementById('cashierBtn');
+  if(o&&c){ if(r==='owner'){ o.classList.add('active'); c.classList.remove('active'); } else { c.classList.add('active'); o.classList.remove('active'); } }
+}
+window.genShopIdNow = function(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let id=''; for(let i=0;i<4;i++) id+=chars[Math.floor(Math.random()*chars.length)];
+  const shopId='SHOP-GURU-'+id;
+  const input=document.getElementById('shopIdInput');
+  if(input){ input.value=shopId; input.focus(); }
+  return shopId;
+}
+window.doBossLoginNow = function(){
+  const shopEl=document.getElementById('shopIdInput');
+  const pinEl=document.getElementById('bossPin');
+  const shop=shopEl ? shopEl.value.trim().toUpperCase() : '';
+  let pin=pinEl ? pinEl.value.trim() : '';
+  pin=pin.replace(/\D/g,'').slice(0,4);
+  if(!shop || shop.length < 6){ alert('Enter Shop ID like SHOP-GURU-123'); return; }
+  if(!/^\d{4}$/.test(pin)){ alert('PIN must be exactly 4 digits. Example: 1234'); return; }
+  localStorage.setItem('guru_role', window.BOSS_ROLE || 'owner');
+  localStorage.setItem('guru_shopId', shop);
+  localStorage.setItem('guru_pin', pin);
+  localStorage.setItem('guru_current_shop', shop);
+  document.getElementById('bossLogin').style.display='none';
+  location.reload();
+}
+window.bossLogoutNow = function(){
+  if(confirm('Switch shop / logout?')){
+    localStorage.removeItem('guru_role');
+    localStorage.removeItem('guru_shopId');
+    location.reload();
+  }
+}
+function initBossUI(){
+  const role=localStorage.getItem('guru_role');
+  const shop=localStorage.getItem('guru_shopId');
+  if(!role || !shop){
+    document.getElementById('bossLogin').style.display='flex';
+    window.genShopIdNow();
+    window.setBossRole('owner');
+    return;
+  }
+  document.getElementById('bossLogin').style.display='none';
+  const badge=document.getElementById('roleBadge');
+  const cur=document.getElementById('currentShopId');
+  if(badge) badge.textContent=role==='owner'?'OWNER':'CASHIER';
+  if(cur) cur.textContent=shop+' • '+role.toUpperCase();
+  if(role==='cashier'){
+    document.querySelectorAll('[data-page="reports"],[data-page="expenses"],[data-page="backup"]').forEach(b=>b.style.display='none');
+  }
+  const pinInput=document.getElementById('bossPin');
+  if(pinInput){ pinInput.addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,4); }); }
+}
+initBossUI();
 </script>
 
 <script>
 'use strict';
-const DEFAULT_PRODUCTS=[{id:uid(),name:'CALUS Speaker',price:850,cost:600,stock:15},{id:uid(),name:'Samsung A07',price:3200,cost:2800,stock:5},{id:uid(),name:'Samsung A16',price:4500,cost:3900,stock:3}];
+const METHODS={cash:'Cash',momo:'Mobile money',bank:'Bank',credit:'Credit'};
+const DEFAULT_SETTINGS={shopName:'GURU POS',tagline:'#YouNameItWeSuply',phone:'0977704769',footer:'Thank you for shopping with us!',pinSalt:'',pinHash:'',lastBackup:''};
+const DEFAULT_PRODUCTS=[{id:uid(),name:'CALUS Speaker',price:850,cost:600,stock:15},{id:uid(),name:'Samsung A07',price:3200,cost:2800,stock:5},{id:uid(),name:'Samsung A16',price:4500,cost:3900,stock:3},{id:uid(),name:'iPhone Case',price:120,cost:40,stock:40},{id:uid(),name:'Bluetooth Headset',price:250,cost:120,stock:20},{id:uid(),name:'Standing Fan',price:950,cost:700,stock:6}];
 const $=id=>document.getElementById(id);
-let state=loadState(),cart=[];
-function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);}
-function normalize(x){x.products=x.products||[];x.sales=x.sales||[];x.debts=x.debts||[];x.payments=x.payments||[];x.expenses=x.expenses||[];x.settings=x.settings||{shopName:'GURU POS'};return x}
-function loadState(){try{const k=window.getDBKey();const x=JSON.parse(localStorage.getItem(k)||'null');if(x&&x.products)return normalize(x);}catch(e){}return normalize({products:DEFAULT_PRODUCTS,sales:[],debts:[],payments:[],expenses:[]});}
-function save(){try{localStorage.setItem(window.getDBKey(),JSON.stringify(state));return true}catch(e){return false}}
-function money(n){return 'K '+Number(n||0).toLocaleString('en-ZM',{minimumFractionDigits:2});}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function showPage(p){document.querySelectorAll('main section').forEach(e=>e.classList.add('hidden'));$('page-'+p).classList.remove('hidden');$('pageTitle').textContent=p;document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));if(p==='stock')renderStock();if(p==='sales')renderSales();if(p==='reports')renderReports();}
-function openCart(){renderCart();}
-function renderProducts(){const q=($('search').value||'').toLowerCase();const ps=state.products.filter(p=>p.name.toLowerCase().includes(q));$('productGrid').innerHTML=ps.map(p=>`<div class="product"><div class="row"><strong>${esc(p.name)}</strong><span class="pill ${p.stock<=3?'low':''}">${p.stock} left</span></div><div class="price">${money(p.price)}</div><button class="btn primary full" ${p.stock<=0?'disabled':''} onclick="addToCart('${p.id}')">Add</button></div>`).join('')||'No products';}
-function addToCart(id){const p=state.products.find(p=>p.id===id);if(!p||p.stock<=0)return;const c=cart.find(c=>c.id===id);if(c){if(c.qty>=p.stock)return alert('Stock limit');c.qty++;}else cart.push({id:p.id,name:p.name,price:p.price,cost:p.cost,qty:1});renderCart();}
-function renderCart(){const total=cart.reduce((s,c)=>s+c.price*c.qty,0);$('cartItems').innerHTML=cart.map(c=>`<div style="padding:8px 0;border-bottom:1px solid #e2e8f0"><div class="row"><strong>${esc(c.name)}</strong><button class="btn light" onclick="removeCart('${c.id}')">x</button></div><div class="row"><span>${c.qty} x ${money(c.price)}</span><strong>${money(c.price*c.qty)}</strong></div></div>`).join('')||'Empty';$('cartTotal').textContent=money(total);$('cartBadge').textContent=cart.reduce((s,c)=>s+c.qty,0);$('cartCount').textContent=cart.length;}
-function removeCart(id){cart=cart.filter(c=>c.id!==id);renderCart();}
-function clearCart(){cart=[];renderCart();}
-async function pushToCloud(type,payload){
- if(!supabaseClient)return;
- const shopId=localStorage.getItem('guru_shopId');
- if(!shopId)return;
- try{ await supabaseClient.from('guru_sync').insert({shop_id:shopId,type:type,payload:payload}); }catch(e){console.log(e);}
+let state=loadState(),cart=[],adminUntil=0,salesLimit=50,pinFails=0,pinLockedUntil=0;
+function uid(){return (crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));}
+function getDBKey(){ const shop=localStorage.getItem('guru_shopId'); return shop ? 'guru_pos_v3_data_' + shop : 'guru_pos_v3_data'; }
+function normalize(x){x.products=x.products||[];x.sales=x.sales||[];x.debts=x.debts||[];x.payments=Array.isArray(x.payments)?x.payments:[];x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.settings={...DEFAULT_SETTINGS,...(x.settings||{})};return x}
+function loadState(){try{const key=getDBKey(); const x=JSON.parse(localStorage.getItem(key)||localStorage.getItem('guru_pos_v3_data')||'null');if(x&&Array.isArray(x.products))return normalize(x);}catch(e){}return normalize({products:DEFAULT_PRODUCTS,sales:[],debts:[],payments:[]});}
+function save(){try{localStorage.setItem(getDBKey(),JSON.stringify(state));return true}catch(e){alert('Could not save data.');return false}}
+function money(n){return 'K '+Number(n||0).toLocaleString('en-ZM',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function round2(n){return Math.round((Number(n)||0)*100)/100}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function dateText(d){return new Date(d).toLocaleString('en-ZM')}
+function todayKey(d=new Date()){return new Date(d).toDateString()}
+function payKey(m){return m==='momo'||m==='bank'?m:'cash'}
+function methodOf(s){return METHODS[s.method]?s.method:'cash'}
+function askForm(title,fields,ok,note){return new Promise(res=>{
+  const d=document.createElement('dialog');d.className='modal';
+  d.innerHTML=`<form><h3>${esc(title)}</h3>${note?`<p class="small">${esc(note)}</p>`:''}${fields.map(f=>`<label class="small" for="af_${f.id}">${esc(f.label)}</label>`+(f.type==='select'?`<select class="field" id="af_${f.id}">${f.options.map(o=>`<option value="${esc(o[0])}" ${o[0]===f.value?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`:`<input class="field" id="af_${f.id}" type="${f.type||'text'}" value="${esc(f.value??'')}" ${f.step?`step="${f.step}"`:''} ${f.min!=null?`min="${f.min}"`:''} ${f.inputmode?`inputmode="${f.inputmode}"`:''} autocomplete="off">`)).join('')}<div class="actions"><button class="btn primary" type="submit">${esc(ok||'Save')}</button><button class="btn light" type="button" data-cancel>Cancel</button></div></form>`;
+  let done=false;const finish=v=>{if(done)return;done=true;try{d.close()}catch(e){}d.remove();res(v)};
+  d.addEventListener('cancel',e=>{e.preventDefault();finish(null)});
+  d.querySelector('[data-cancel]').onclick=()=>finish(null);
+  d.querySelector('form').addEventListener('submit',e=>{e.preventDefault();const v={};fields.forEach(f=>v[f.id]=d.querySelector('#af_'+f.id).value);finish(v)});
+  document.body.appendChild(d);try{d.showModal()}catch(e){d.setAttribute('open','')}
+});}
+function showReceipt(text){
+  const d=document.createElement('dialog');d.className='modal';
+  d.innerHTML=`<pre>${esc(text)}</pre><div class="actions"><button class="btn primary" data-p>Print / Save PDF</button><button class="btn light" data-c>Close</button></div>`;
+  const close=()=>{try{d.close()}catch(e){}d.remove()};
+  d.querySelector('[data-p]').onclick=()=>printText(text);d.querySelector('[data-c]').onclick=close;d.addEventListener('cancel',e=>{e.preventDefault();close()});
+  document.body.appendChild(d);try{d.showModal()}catch(e){d.setAttribute('open','')}
 }
-async function checkout(){
- if(!cart.length)return alert('Empty');
- for(const c of cart){const p=state.products.find(p=>p.id===c.id);if(!p||p.stock<c.qty)return alert('Stock changed '+c.name);}
- const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
- const record={id:uid(),date:new Date().toISOString(),customer:$('customerName').value||'Walk-in',total,items:cart.reduce((s,c)=>s+c.qty,0),cart:cart.map(c=>({...c})),shop_id:localStorage.getItem('guru_shopId')};
- cart.forEach(c=>{const p=state.products.find(p=>p.id===c.id);if(p)p.stock-=c.qty;});
- state.sales.push(record); save();
- await pushToCloud('sale',record); await pushToCloud('stock',state.products);
- cart=[];renderAll();alert('✅ Sale LIVE SYNCED! '+money(total));
+function printText(text){let a=$('printArea');if(!a){a=document.createElement('pre');a.id='printArea';document.body.appendChild(a)}a.textContent=text;window.print()}
+async function hashPin(pin,salt){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));return Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('')}
+async function setPin(pin){const salt=uid();state.settings.pinSalt=salt;state.settings.pinHash=await hashPin(pin,salt);save()}
+function setAdmin(on){adminUntil=on?Date.now()+10*60*1000:0;$('adminLabel').textContent=on?'ADMIN MODE':'Customer mode';}
+function isAdmin(){if(adminUntil&&Date.now()>adminUntil)setAdmin(false);return adminUntil>0}
+async function adminLogin(){
+  if(isAdmin())return true;
+  if(!state.settings.pinHash){const r=await askForm('Set your admin PIN',[{id:'p1',label:'New PIN (4-8 digits)',type:'password',inputmode:'numeric'},{id:'p2',label:'Repeat PIN',type:'password',inputmode:'numeric'}],'Set PIN');if(!r)return false;if(!/^\d{4,8}$/.test(r.p1)||r.p1!==r.p2){alert('PIN must be 4-8 digits and match');return false}await setPin(r.p1);setAdmin(true);return true}
+  if(Date.now()<pinLockedUntil){alert('Too many wrong attempts. Try again in '+Math.ceil((pinLockedUntil-Date.now())/1000)+' seconds.');return false}
+  const r=await askForm('Admin login',[{id:'pin',label:'PIN',type:'password',inputmode:'numeric'}],'Unlock');
+  if(!r)return false;
+  if(await hashPin(r.pin,state.settings.pinSalt)===state.settings.pinHash){pinFails=0;setAdmin(true);return true}
+  if(++pinFails>=5){pinFails=0;pinLockedUntil=Date.now()+30000}
+  alert('Incorrect PIN.');return false}
+function adminLogout(){setAdmin(false)}
+async function requireAdmin(){return isAdmin()||await adminLogin()}
+async function changePin(){if(!await requireAdmin())return;const r=await askForm('Change admin PIN',[{id:'p1',label:'New PIN',type:'password'},{id:'p2',label:'Repeat',type:'password'}],'Save PIN');if(!r)return;if(r.p1!==r.p2||!/^\d{4,8}$/.test(r.p1)){alert('No match');return}await setPin(r.p1);alert('PIN changed.')}
+async function forgotPin(){const r=await askForm('Reset PIN',[{id:'key',label:'Your GURU licence key (GURU1-…)',type:'text'}],'Continue');if(!r)return;if(r.key.replace(/\s+/g,'')!==(localStorage.getItem('GURU_LICENSE_KEY')||'').replace(/\s+/g,'')){alert('Not licence key');return}const r2=await askForm('Choose a new PIN',[{id:'p1',label:'New PIN',type:'password'},{id:'p2',label:'Repeat',type:'password'}],'Set PIN');if(!r2||r2.p1!==r2.p2)return;await setPin(r2.p1);setAdmin(true);alert('PIN reset.');}
+function showPage(page){document.querySelectorAll('main section[id^="page-"]').forEach(e=>e.classList.add('hidden'));$('page-'+page).classList.remove('hidden');$('pageTitle').textContent=({sell:'Sell',stock:'Stock management',sales:'Sales history',reports:'Reports',expenses:'Expenses',debts:'Debt book',backup:'Backup & settings'})[page]||page;document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('search').classList.toggle('hidden',page!=='sell');if(page==='stock')renderStock();if(page==='sales')renderSales();if(page==='reports')renderReports();if(page==='expenses'){if(!$('eDate').value)$('eDate').value=localDate();renderExpenses()}if(page==='debts')renderDebts();if(page==='sell')renderProducts();if(page==='backup')fillSettings();}
+function openCart(){if(innerWidth<=1050){renderCart();$('cartOverlay').classList.remove('hidden')}else document.querySelector('.cartpanel').scrollIntoView({behavior:'smooth'})}
+function closeCart(){$('cartOverlay').classList.add('hidden')}
+function renderProducts(){const q=($('search').value||'').toLowerCase();const ps=state.products.filter(p=>p.name.toLowerCase().includes(q));$('productGrid').innerHTML=ps.map(p=>`<article class="product"><div class="row"><h3>${esc(p.name)}</h3><span class="pill ${p.stock<=3?'low':''}">${p.stock<=0?'OUT':p.stock+' left'}</span></div><div class="price">${money(p.price)}</div><div class="small">Profit: ${money(p.price-p.cost)}</div><button class="btn primary full" ${p.stock<=0?'disabled':''} onclick="addToCart('${p.id}')">${p.stock<=0?'Out of stock':'Add to cart'}</button></article>`).join('')||'<div class="empty">No matching products.</div>';}
+function addToCart(id){const p=state.products.find(p=>p.id===id);if(!p||p.stock<=0)return alert('Out of stock.');const c=cart.find(c=>c.id===id);const qty=c?c.qty:0;if(qty>=p.stock)return alert('Cannot exceed stock.');if(c)c.qty++;else cart.push({id,name:p.name,price:p.price,cost:p.cost,qty:1});renderCart();if(innerWidth<=1050)openCart();}
+function cartMarkup(){return cart.map(c=>`<div class="cartline"><div class="row"><strong>${esc(c.name)}</strong><button class="btn light" onclick="removeCart('${c.id}')">Remove</button></div><div class="row"><span class="small">Price <input class="field pricein" type="number" min="0.01" step="0.01" value="${c.price}" onchange="setPrice('${c.id}',this.value)"></span><div class="actions"><button class="btn light" onclick="changeQty('${c.id}',-1)">−</button><strong>${c.qty}</strong><button class="btn light" onclick="changeQty('${c.id}',1)">+</button></div></div><div class="right small">${money(c.price*c.qty)}</div></div>`).join('')||'<div class="empty">Cart is empty.</div>'}
+function cartTotal(){return round2(cart.reduce((s,c)=>s+c.price*c.qty,0))}
+function renderCart(){const total=cartTotal(),count=cart.reduce((s,c)=>s+c.qty,0);['cartItems','mobileCartItems'].forEach(id=>$(id).innerHTML=cartMarkup());['cartTotal','mobileCartTotal'].forEach(id=>$(id).textContent=money(total));$('cartBadge').textContent=count;$('cartCount').textContent=count+' items';}
+function setPrice(id,val){const c=cart.find(c=>c.id===id);if(!c)return;const n=Number(val);if(!Number.isFinite(n)||n<=0){alert('Enter price >0');return renderCart()}c.price=round2(n);renderCart()}
+function changeQty(id,delta){const c=cart.find(c=>c.id===id);if(!c)return;const p=state.products.find(p=>p.id===id);if(delta>0&&(!p||c.qty>=p.stock))return alert('Cannot exceed stock.');c.qty+=delta;if(c.qty<=0)cart=cart.filter(x=>x.id!==id);renderCart()}
+function removeCart(id){cart=cart.filter(c=>c.id!==id);renderCart()}
+function clearCart(){cart=[];renderCart()}
+function syncPay(v){$('payMethod').value=v;$('mobilePayMethod').value=v}
+function getCustomer(){return {name:$('customerName').value.trim()||$('mobileCustomerName').value.trim(),phone:$('customerPhone').value.trim()||$('mobileCustomerPhone').value.trim()}}
+function clearCustomer(){['customerName','customerPhone','mobileCustomerName','mobileCustomerPhone'].forEach(id=>$(id).value='')}
+async function checkout(kind){
+  if(!cart.length)return alert('Cart is empty.');
+  for(const c of cart){const p=state.products.find(p=>p.id===c.id);if(!p||p.stock<c.qty)return alert('Stock changed for '+c.name);}
+  const customer=getCustomer();
+  if(kind==='credit'&&!customer.name)return alert('Enter customer name for credit.');
+  const method=kind==='credit'?'credit':payKey($('payMethod').value);
+  const total=cartTotal(),profit=round2(cart.reduce((s,c)=>s+(c.price-c.cost)*c.qty,0));
+  const record={id:uid(),date:new Date().toISOString(),customer:customer.name||'Walk-in',phone:customer.phone,method,total,profit,items:cart.reduce((s,c)=>s+c.qty,0),cart:cart.map(c=>({...c})),shop_id:localStorage.getItem('guru_shopId')};
+  if(method==='credit'){state.debts.push({id:uid(),saleId:record.id,date:record.date,customer:customer.name,phone:customer.phone,total,remaining:total,items:record.items,cart:record.cart,paid:false,payments:[]});}
+  state.sales.push(record);
+  cart.forEach(c=>{const p=state.products.find(p=>p.id===c.id);p.stock-=c.qty});
+  if(!save())return;
+  await pushToCloud('sale', record);
+  await pushToCloud('stock', state.products);
+  if(method==='credit'){ await pushToCloud('debt', state.debts); }
+  const receipt=receiptText(record);cart=[];renderAll();clearCustomer();closeCart();
+  if(kind==='whatsapp'){if(!customer.phone){showReceipt(receipt);return}openWhatsApp(customer.phone,receipt)}else showReceipt(receipt)
 }
-function renderStock(){$('stockCount').textContent=state.products.length;$('stockList').innerHTML=state.products.map(p=>`<div class="listrow"><div><strong>${esc(p.name)}</strong><div class="small">${money(p.price)} · ${p.stock} left</div></div><button class="btn light" onclick="editStock('${p.id}')">Edit</button></div>`).join('');}
-function editStock(id){const p=state.products.find(p=>p.id===id);const q=prompt('New stock',p.stock);if(q===null)return;p.stock=Number(q);save();pushToCloud('stock',state.products);renderAll();}
-function renderSales(){$('salesList').innerHTML=state.sales.slice(-50).reverse().map(s=>`<div class="listrow"><span>${new Date(s.date).toLocaleString()} · ${esc(s.customer)} · ${money(s.total)}</span></div>`).join('')||'No sales';}
-function renderReports(){const today=new Date().toDateString();const todays=state.sales.filter(s=>new Date(s.date).toDateString()===today);$('rSales').textContent=money(todays.reduce((a,s)=>a+s.total,0));$('sideToday').textContent=$('rSales').textContent;}
-function renderAll(){renderProducts();renderCart();renderStock();renderSales();renderReports();}
-function exportBackup(){const blob=new Blob([JSON.stringify(state)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='guru-backup-'+(localStorage.getItem('guru_shopId')||'shop')+'.json';a.click();}
-function restoreBackup(){const f=$('restoreFile').files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=normalize(JSON.parse(r.result));save();renderAll();alert('Restored');}catch(e){alert('Invalid');}};r.readAsText(f);}
-renderAll();
+function receiptText(s){const st=state.settings;return `${st.shopName}\n${st.tagline}\n${st.phone}\n--------------------------------\n${s.voided?'*** VOIDED ***\n':''}Receipt: ${s.id.slice(0,8)}\nDate: ${dateText(s.date)}\nCustomer: ${s.customer}\n--------------------------------\n${s.cart.map(c=>`${c.name}\n ${c.qty} x ${money(c.price)} = ${money(c.qty*c.price)}`).join('\n')}\n--------------------------------\nTOTAL: ${money(s.total)}\nPaid by: ${METHODS[methodOf(s)].toUpperCase()}\n${st.footer}`}
+function showSaleReceipt(id){const s=state.sales.find(s=>s.id===id);if(s)showReceipt(receiptText(s))}
+function openWhatsApp(phone,msg){let n=phone.replace(/\D/g,'');if(n.startsWith('0'))n='260'+n.slice(1);else if(!n.startsWith('260'))n='260'+n;window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank','noopener')}
+$('productForm').addEventListener('submit',async e=>{e.preventDefault();if(!await requireAdmin())return;const name=$('pName').value.trim(),cost=Number($('pCost').value),price=Number($('pPrice').value),stock=Number($('pQty').value);if(!name||cost<0||price<=0||stock<0)return alert('Invalid');state.products.push({id:uid(),name,cost,price,stock});save();pushToCloud('stock', state.products);e.target.reset();renderAll()});
+function renderStock(){$('stockCount').textContent=state.products.length+' products';$('stockList').innerHTML=state.products.map(p=>`<div class="listrow"><div><strong>${esc(p.name)}</strong><div class="small">Cost ${money(p.cost)} · Sell ${money(p.price)} · Qty ${p.stock}</div></div><div class="actions"><button class="btn orange" onclick="restock('${p.id}')">Restock</button><button class="btn light" onclick="editProduct('${p.id}')">Edit</button><button class="btn red" onclick="deleteProduct('${p.id}')">×</button></div></div>`).join('')||'<div class="empty">No products</div>'}
+async function restock(id){if(!await requireAdmin())return;const p=state.products.find(p=>p.id===id);if(!p)return;const r=await askForm('Restock '+p.name,[{id:'q',label:'Qty to ADD (now '+p.stock+')',type:'number',step:'1',min:'1',value:'1'}],'Add');if(!r)return;const n=Number(r.q);if(n<=0)return; p.stock+=n;save();await pushToCloud('stock', state.products);renderAll()}
+async function editProduct(id){if(!await requireAdmin())return;const p=state.products.find(p=>p.id===id);if(!p)return;const r=await askForm('Edit',[{id:'name',label:'Name',value:p.name},{id:'price',label:'Sell K',type:'number',value:p.price},{id:'cost',label:'Cost K',type:'number',value:p.cost},{id:'stock',label:'Stock',type:'number',value:p.stock}],'Save');if(!r)return;Object.assign(p,{name:r.name.trim(),price:Number(r.price),cost:Number(r.cost),stock:Number(r.stock)});save();await pushToCloud('stock', state.products);renderAll()}
+async function deleteProduct(id){if(!await requireAdmin())return;if(confirm('Delete?')){state.products=state.products.filter(p=>p.id!==id);save();await pushToCloud('stock', state.products);renderAll()}}
+function withinRange(date,range){const d=new Date(date),now=new Date();if(range==='today')return d.toDateString()===now.toDateString();if(range==='week'){const from=new Date();from.setDate(from.getDate()-6);from.setHours(0,0,0,0);return d>=from&&d<=now}if(range==='month')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();if(range==='custom'){const from=$('repFrom').value,to=$('repTo').value;return (!from||d>=new Date(from+'T00:00:00'))&&(!to||d<=new Date(to+'T23:59:59'))}return true}
+function reportData(){const range=$('reportRange').value;const inRange=state.sales.filter(s=>withinRange(s.date,range));const ss=inRange.filter(s=>!s.voided);let total=0,profit=0,credit=0,debtIn=0,refunds=0;const best={},rec={cash:0,momo:0,bank:0};ss.forEach(s=>{total+=s.total;profit+=s.profit||0;if(s.method==='credit')credit+=s.total;(s.cart||[]).forEach(c=>best[c.name]=(best[c.name]||0)+c.qty)});inRange.forEach(s=>{if(s.method!=='credit')rec[payKey(s.method)]+=s.total});state.payments.filter(p=>withinRange(p.date,range)).forEach(p=>{rec[payKey(p.method)]+=p.amount;if(p.refund)refunds+=-p.amount;else debtIn+=p.amount});const es=state.expenses.filter(e=>withinRange(e.date,range)),out={cash:0,momo:0,bank:0};let expenses=0;es.forEach(e=>{out[payKey(e.method)]+=e.amount;expenses+=e.amount});return {range,ss,total:round2(total),profit:round2(profit),credit:round2(credit),debtIn:round2(debtIn),refunds:round2(refunds),expenses:round2(expenses),net:round2(profit-expenses),rec,out,best}}
+function renderReports(){const r=reportData();$('repCustom').classList.toggle('hidden',r.range!=='custom');$('rSales').textContent=money(r.total);$('rCount').textContent=r.ss.length+' transactions';$('rProfit').textContent=money(r.profit);$('rMargin').textContent=(r.total?Math.round(r.profit/r.total*100):0)+'% margin';$('rCredit').textContent=money(r.credit);$('rDebtIn').textContent=money(r.debtIn);$('rExp').textContent=money(r.expenses);$('rNet').textContent=money(r.net);const totalIn=r.rec.cash+r.rec.momo+r.rec.bank,totalNet=totalIn-r.expenses;$('receivedList').innerHTML=['cash','momo','bank'].map(k=>`<div class="listrow"><div><span>${METHODS[k]}</span><div class="small">in ${money(r.rec[k])} · exp ${money(r.out[k])}</div></div><strong>${money(r.rec[k]-r.out[k])}</strong></div>`).join('')+`<div class="listrow"><strong>Net in hand</strong><strong>${money(totalNet)}</strong></div>`;const top=Object.entries(r.best).sort((a,b)=>b[1]-a[1]).slice(0,5);$('bestList').innerHTML=top.map(([n,q],i)=>`<div class="listrow"><span>${i+1}. ${esc(n)}</span><strong>${q} sold</strong></div>`).join('')||'<div class="empty">No sales</div>';const low=state.products.filter(p=>p.stock<=3);$('lowList').innerHTML=low.map(p=>`<div class="listrow"><span>${esc(p.name)}</span><span>${p.stock} left <button class="btn orange" onclick="restock('${p.id}')">Restock</button></span></div>`).join('')||'<div class="empty good">All stocked</div>';}
+function renderSales(){const from=$('salesFrom').value,to=$('salesTo').value;const all=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).reverse();const ss=all.slice(0,salesLimit);$('salesList').innerHTML=ss.map(s=>`<div class="listrow"><div><strong class="${s.voided?'strike':''}">${esc(s.customer)} · ${money(s.total)}</strong><div class="small">${esc(METHODS[methodOf(s)])} · ${dateText(s.date)}</div></div><div class="actions"><button class="btn light" onclick="showSaleReceipt('${s.id}')">Receipt</button>${s.voided?'':`<button class="btn red" onclick="voidSale('${s.id}')">Void</button>`}</div></div>`).join('')||'<div class="empty">No sales</div>'}
+async function voidSale(id){if(!await requireAdmin())return;const s=state.sales.find(s=>s.id===id);if(!s||s.voided)return;const r=await askForm('Void this sale?',[{id:'reason',label:'Reason',type:'text'}],'Void');if(!r)return;(s.cart||[]).forEach(c=>{const p=state.products.find(p=>p.id===c.id);if(p)p.stock+=c.qty});s.voided=true;save();await pushToCloud('stock', state.products);renderAll();}
+function renderDebts(){const q=($('debtSearch').value||'').toLowerCase();const ds=state.debts.filter(d=>Number(d.remaining)>0&&((d.customer||'').toLowerCase().includes(q)||(d.phone||'').includes(q))).sort((a,b)=>new Date(a.date)-new Date(b.date));const owed=state.debts.reduce((s,d)=>s+Math.max(0,Number(d.remaining)||0),0);$('debtSummary').textContent=ds.length+' customers owing · Total '+money(owed);$('debtList').innerHTML=ds.map(d=>`<div class="listrow"><div><strong>${esc(d.customer)} · ${money(d.remaining)}</strong><div class="small">${esc(d.phone||'No phone')} · Original ${money(d.total)}</div></div><div class="actions"><button class="btn green" onclick="recordPayment('${d.id}')">Payment</button><button class="btn light" onclick="remindDebt('${d.id}')">WhatsApp</button></div></div>`).join('')||'<div class="empty">No debts</div>'}
+async function recordPayment(id){const d=state.debts.find(d=>d.id===id);if(!d)return;const r=await askForm('Payment from '+d.customer,[{id:'amount',label:'Amount K - owed '+money(d.remaining),type:'number',value:d.remaining},{id:'method',label:'Paid by',type:'select',value:'cash',options:[['cash','Cash'],['momo','MoMo'],['bank','Bank']]}],'Record');if(!r)return;const amount=round2(r.amount),method=payKey(r.method);if(amount<=0||amount>d.remaining+0.001)return alert('Invalid amount');const now=new Date().toISOString();d.remaining=round2(Math.max(0,d.remaining-amount));d.paid=d.remaining===0;d.payments=d.payments||[];d.payments.push({id:uid(),date:now,amount,method});state.payments.push({id:uid(),debtId:id,customer:d.customer,date:now,amount,method});save();await pushToCloud('debt', state.debts);renderAll();}
+function remindDebt(id){const d=state.debts.find(d=>d.id===id);if(!d.phone)return alert('No phone');openWhatsApp(d.phone,`Hello ${d.customer}, reminder from ${state.settings.shopName}. Balance ${money(d.remaining)}.`)}
+function renderNotice(){const el=$('notice'),lb=state.settings.lastBackup;if(!lb){el.className='notice';el.textContent='No backup yet. Save backup in Backup & settings.';return}const days=Math.floor((Date.now()-new Date(lb))/864e5);el.className='notice'+(days>7?'':' ok');el.textContent=days>7?'Last backup '+days+' days ago.':'Last backup today.';}
+const EXP_CATS=['Rent','Transport','Electricity & airtime','Wages','Repairs','Marketing','Other'];
+function localDate(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
+$('expenseForm').addEventListener('submit',async e=>{e.preventDefault();if(!await requireAdmin())return;const amount=round2($('eAmount').value),ds=$('eDate').value||localDate();const date=ds===localDate()?new Date().toISOString():new Date(ds+'T12:00:00').toISOString();state.expenses.push({id:uid(),date,category:$('eCat').value||'Other',amount,method:payKey($('eMethod').value),note:$('eNote').value.trim()});if(!save())return;$('eAmount').value='';$('eNote').value='';await pushToCloud('expense', state.expenses);renderAll()});
+function renderExpenses(){if(!$('eCat').innerHTML)$('eCat').innerHTML=EXP_CATS.map(c=>`<option>${esc(c)}</option>`).join('');const es=state.expenses.filter(e=>withinRange(e.date,$('expRange').value)).sort((a,b)=>new Date(b.date)-new Date(a.date));const total=es.reduce((s,e)=>s+e.amount,0);$('expSummary').textContent=es.length+' expense(s) · Total '+money(total);$('expList').innerHTML=es.slice(0,100).map(e=>`<div class="listrow"><div><strong>${esc(e.category)} · ${money(e.amount)}</strong><div class="small">${new Date(e.date).toLocaleDateString()}</div></div><button class="btn red" onclick="deleteExpense('${e.id}')">×</button></div>`).join('')||'<div class="empty">No expenses</div>'}
+async function deleteExpense(id){if(!await requireAdmin())return;if(confirm('Delete expense?')){state.expenses=state.expenses.filter(x=>x.id!==id);save();await pushToCloud('expense', state.expenses);renderAll()}}
+function exportExpensesCSV(){const rows=[['Date','Category','Amount K','Paid by','Note'],...state.expenses.map(e=>[e.date,e.category,e.amount,METHODS[payKey(e.method)],e.note])];download('guru-pos-expenses.csv',rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8')}
+function renderAll(){renderProducts();renderCart();renderStock();renderSales();renderDebts();renderReports();renderExpenses();renderNotice();const st=state.settings;$('brandTop').innerHTML='GURU <span>POS</span> <small id="roleBadge" style="background:#f97316;padding:2px 8px;border-radius:20px;font-size:10px;margin-left:6px">'+(localStorage.getItem('guru_role')||'BOSS').toUpperCase()+'</small>';$('taglineTop').innerHTML='#YouNameItWeSuply · v4.1 Boss LIVE • <span id="currentShopId">'+(localStorage.getItem('guru_shopId')||'')+'</span> • <span id="liveText"><span class="live-dot '+(supabaseClient?'live-on':'live-off')+'"></span>'+(supabaseClient?'Live ON':'Offline')+'</span>';document.title=st.shopName+' — Sales & Stock';const today=state.sales.filter(s=>!s.voided&&todayKey(s.date)===todayKey());$('sideToday').textContent=money(today.reduce((s,x)=>s+x.total,0));$('sideDebt').textContent=money(state.debts.reduce((s,d)=>s+Math.max(0,d.remaining||0),0));}
+function fillSettings(){const s=state.settings;$('sName').value=s.shopName;$('sTagline').value=s.tagline;$('sPhone').value=s.phone;$('sFooter').value=s.footer}
+$('settingsForm').addEventListener('submit',async e=>{e.preventDefault();if(!await requireAdmin())return;const s=state.settings;s.shopName=$('sName').value.trim()||'GURU POS';s.tagline=$('sTagline').value.trim();s.phone=$('sPhone').value.trim();s.footer=$('sFooter').value.trim();save();renderAll();alert('Settings saved.')});
+function download(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function backupJson(){const {pinSalt,pinHash,...settings}=state.settings;return JSON.stringify({products:state.products,sales:state.sales,debts:state.debts,payments:state.payments,expenses:state.expenses,settings,exportedAt:new Date().toISOString(),app:'GURU POS Boss v4.1 LIVE'},null,2)}
+function markBackup(){state.settings.lastBackup=new Date().toISOString();save();renderNotice()}
+function backupName(){return 'guru-pos-boss-'+(localStorage.getItem('guru_shopId')||'backup')+'-'+new Date().toISOString().slice(0,10)+'.json'}
+function exportBackup(){download(backupName(),backupJson(),'application/json');markBackup()}
+async function shareBackup(){const file=new File([backupJson()],backupName(),{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'GURU POS backup'});markBackup();return}catch(e){if(e&&e.name==='AbortError')return}}exportBackup()}
+function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+function exportSalesCSV(){const rows=[['Date','Receipt ID','Customer','Phone','Method','Total K','Profit K','Items','Products','Voided'],...state.sales.map(s=>[s.date,s.id,s.customer,s.phone,METHODS[methodOf(s)],s.total,s.profit,s.items,(s.cart||[]).map(c=>`${c.name} x${c.qty}`).join('; '),s.voided?'YES':''])];download('guru-pos-sales.csv',rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8')}
+function exportStockCSV(){const rows=[['Product','Cost K','Selling price K','Profit per item K','Stock'],...state.products.map(p=>[p.name,p.cost,p.price,p.price-p.cost,p.stock])];download('guru-pos-stock.csv',rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8')}
+async function restoreBackup(){if(!await requireAdmin())return;const f=$('restoreFile').files[0];if(!f)return alert('Choose file');if(!confirm('Replace all data?'))return;try{const x=JSON.parse(await f.text());if(!x||!Array.isArray(x.products))throw new Error('Invalid backup');const keep={pinSalt:state.settings.pinSalt,pinHash:state.settings.pinHash};state=normalize({products:x.products,sales:x.sales,debts:x.debts,payments:Array.isArray(x.payments)?x.payments:[],expenses:Array.isArray(x.expenses)?x.expenses:[],settings:{...(x.settings||{}),...keep}});cart=[];if(save()){renderAll();await pushToCloud('stock', state.products);alert('Restored & synced.');}}catch(e){alert('Restore failed: '+e.message)}}
+async function clearAllData(){if(!await requireAdmin())return;if(!confirm('Clear all?'))return;state=normalize({products:[],sales:[],debts:[],payments:[],expenses:[],settings:state.settings});cart=[];save();renderAll();showPage('sell')}
+function printReport(){const r=reportData();showReceipt(`${state.settings.shopName} — REPORT\nDate: ${dateText(new Date())}\nSales: ${money(r.total)}\nProfit: ${money(r.profit)}\nExpenses: ${money(r.expenses)}\nNET: ${money(r.net)}`)}
+function printDebts(){const ds=state.debts.filter(d=>d.remaining>0);showReceipt(state.settings.shopName+' — DEBT BOOK\nDate: '+dateText(new Date())+'\n\n'+(ds.map(d=>`${d.customer}: ${money(d.remaining)}`).join('\n')||'No debts')+'\n\nTotal: '+money(ds.reduce((a,d)=>a+d.remaining,0)))}
+function printSales(){const from=$('salesFrom').value,to=$('salesTo').value;const ss=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).reverse();showReceipt(state.settings.shopName+' — SALES\n'+ss.map(s=>`${dateText(s.date)} | ${s.customer} | ${money(s.total)}`).join('\n')+'\n\nTotal: '+money(ss.filter(s=>!s.voided).reduce((a,s)=>a+s.total,0)))}
+
 async function initLiveSync(){
- if(!supabaseClient){$('syncInfo').textContent='Sync off';$('liveText').textContent='Offline';return;}
- const shopId=localStorage.getItem('guru_shopId'); if(!shopId)return;
- $('syncStatus').innerHTML='<span class="live-dot live-on"></span>Live SYNC'; $('liveText').textContent='Live ON - '+shopId; $('syncInfo').textContent='Syncing '+shopId;
- try{
-  const {data}=await supabaseClient.from('guru_sync').select('*').eq('shop_id',shopId).order('created_at',{ascending:true}).limit(200);
-  if(data){ const last=[...data].reverse().find(d=>d.type==='stock'); if(last&&Array.isArray(last.payload)){ state.products=last.payload; save(); renderAll(); } }
- }catch(e){}
- const ch=supabaseClient.channel('shop-'+shopId).on('postgres_changes',{event:'INSERT',schema:'public',table:'guru_sync',filter:`shop_id=eq.${shopId}`},p=>{
-   const row=p.new; if(row.type==='stock'&&Array.isArray(row.payload)){ state.products=row.payload; save(); renderAll(); console.log('Live stock'); }
-   if(row.type==='sale'){ if(!state.sales.find(s=>s.id===row.payload.id)){ state.sales.push(row.payload); save(); renderAll(); } }
- }).subscribe();
+  const elLive=$('liveText'), elInfo=$('syncInfo'), elLoginLive=$('loginLive');
+  if(!supabaseClient){
+    if(elLive) elLive.innerHTML='<span class="live-dot live-off"></span>Offline';
+    if(elInfo) elInfo.textContent='Sync off';
+    if(elLoginLive) elLoginLive.innerHTML='<span class="live-dot live-off"></span>Offline';
+    return;
+  }
+  const shopId=localStorage.getItem('guru_shopId');
+  if(!shopId) return;
+  if(elLive) elLive.innerHTML='<span class="live-dot live-on"></span>Live ON - '+shopId;
+  if(elInfo) elInfo.textContent='Live syncing '+shopId;
+  if(elLoginLive) elLoginLive.innerHTML='<span class="live-dot live-on"></span>Live ON';
+  try{
+    const {data} = await supabaseClient.from('guru_sync').select('*').eq('shop_id', shopId).order('created_at', {ascending: true}).limit(300);
+    if(data && data.length){
+      data.filter(d=>d.type==='sale').forEach(d=>{
+        if(!state.sales.find(s=>s.id===d.payload.id)){ state.sales.push(d.payload); }
+      });
+      save(); renderAll();
+    }
+  }catch(e){}
+  const channel = supabaseClient.channel('guru-'+shopId)
+    .on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'guru_sync', filter: `shop_id=eq.${shopId}`}, (payload)=>{
+      const row=payload.new;
+      if(!row) return;
+      if(row.type==='stock' && Array.isArray(row.payload)){
+        const cur = JSON.stringify(state.products);
+        const incoming = JSON.stringify(row.payload);
+        if(cur !== incoming){
+          state.products = row.payload;
+          save(); renderAll();
+        }
+      }
+      if(row.type==='sale'){
+        if(!state.sales.find(s=>s.id===row.payload.id)){
+          state.sales.push(row.payload);
+          save(); renderAll();
+        }
+      }
+    }).subscribe();
 }
+renderAll();
 initLiveSync();
+if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW fail',e)))}
+</script>
+<button id="installBtn" style="display:none; position:fixed; bottom:80px; left:10%; right:10%; padding:15px; background:#0a2240; color:white; border:none; border-radius:10px; font-size:16px; z-index:999;">📲 Install GURU App</button>
+<script>
+let deferredPrompt; const installBtn=document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display='block'; });
+installBtn.addEventListener('click', async ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted') installBtn.style.display='none'; deferredPrompt=null; } });
+window.addEventListener('appinstalled', ()=>{ installBtn.style.display='none'; });
 </script>
 </body>
 </html>

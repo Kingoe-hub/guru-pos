@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "GURU POS - Sales & Stock Manager",
+  "short_name": "GURU POS",
+  "description": "Offline-ready point of sale, inventory, sales reports and debt book for GURU POS.",
+  "lang": "en-ZM",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f4f6",
+  "theme_color": "#0a2240",
+  "categories": [
+    "business",
+    "productivity",
+    "finance"
+  ],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

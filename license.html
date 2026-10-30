@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Activate GURU POS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{font-family:system-ui,sans-serif;padding:20px;text-align:center;max-width:420px;margin:auto;color:#172033}
+  #deviceId{letter-spacing:2px;background:#f0f0f0;padding:15px;border:2px solid #0a2240;border-radius:10px}
+  button,input{font:inherit;border-radius:10px}
+  .btn{padding:12px;border:0;background:#0a2240;color:#fff;cursor:pointer}
+  textarea{width:100%;padding:12px;font-size:15px;border:2px solid #0a2240;border-radius:10px;font-family:monospace}
+</style>
+</head>
+<body>
+  <h2>GURU POS — Activation</h2>
+  <p>Your Device ID (send this to the seller):</p>
+  <h1 id="deviceId">....</h1>
+  <button class="btn" onclick="copyId()">Copy ID</button>
+  <a id="waLink" target="_blank" rel="noopener"><button class="btn" style="background:#16a34a">Send ID on WhatsApp</button></a>
+
+  <p style="margin-top:20px">Licence fee: <b>K450</b>. After payment the seller sends you a key starting with <b>GURU1-</b>.</p>
+
+  <textarea id="keyInput" rows="4" placeholder="Paste your licence key here (GURU1-…)"></textarea>
+  <br><br>
+  <button class="btn" onclick="activate()" style="width:100%;padding:15px;background:#00a651;font-size:18px">ACTIVATE NOW</button>
+  <p id="msg" style="font-weight:bold;margin-top:15px"></p>
+  <p style="font-size:12px;color:#64748b">Keep your Device ID. If you clear your browser data a new ID is created and you will need a new key.</p>
+
+<script src="license.js"></script>
+<script>
+  const SELLER_WHATSAPP = '260977704769'; // owner's WhatsApp number (international format, no +)
+  const msg = document.getElementById('msg');
+  let deviceId = '....';
+  try { deviceId = getDeviceId(); } catch (e) { msg.innerText = 'This browser cannot create a Device ID.'; }
+  document.getElementById('deviceId').innerText = deviceId;
+  document.getElementById('waLink').href = 'https://wa.me/' + SELLER_WHATSAPP + '?text=' +
+    encodeURIComponent('Hello, I want to activate GURU POS. My Device ID is ' + deviceId);
+  if (!(window.crypto && crypto.subtle)) msg.innerText = 'Open this page over https:// (or localhost) so the key can be checked.';
+
+  function copyId() {
+    if (navigator.clipboard) navigator.clipboard.writeText(deviceId).then(() => alert('Copied: ' + deviceId), () => alert(deviceId));
+    else alert(deviceId);
+  }
+  async function activate() {
+    const key = document.getElementById('keyInput').value.replace(/\s+/g, '');
+    if (!key) { msg.innerText = 'Enter your key first'; return; }
+    msg.innerText = 'Checking...';
+    if (await isValidKey(deviceId, GURU_PLAN, key)) {
+      localStorage.setItem('GURU_ACTIVATED', 'true');
+      localStorage.setItem('GURU_LICENSE_KEY', key);
+      msg.innerText = 'Activated! Opening POS...';
+      setTimeout(() => window.location.href = './index.html', 800);
+    } else {
+      msg.innerText = 'Invalid key for this Device ID. Check that you pasted the whole key.';
+    }
+  }
+</script>
+</body>
+</html>

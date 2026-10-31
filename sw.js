@@ -1,4 +1,4 @@
-const CACHE_NAME = 'guru-pos-v4-boss-1'; // Changed from v3 to v4 - forces update on all 3 phones
+const CACHE_NAME = 'guru-pos-v4-boss-2'; // BUMPED - forces update on all phones
 
 const APP_SHELL = [
   './', 
@@ -13,103 +13,103 @@ const OPTIONAL = [
   './icon-512.png',
   './icon-192-maskable.png',
   './icon-512-maskable.png'
-]; // cached if present; missing icon won't break install
+];
 
-// === INSTALL - Cache Boss Version ===
+// === INSTALL ===
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      console.log('[GURU BOSS] Caching Boss v4 shell');
+      console.log('[GURU BOSS v4.2] Caching shell');
       await cache.addAll(APP_SHELL);
-      // Cache icons but don't fail if missing
       await Promise.allSettled(OPTIONAL.map(u => cache.add(u).catch(()=>{})));
     })
   );
-  self.skipWaiting(); // Activate v4 immediately on all phones
+  self.skipWaiting();
 });
 
-// === ACTIVATE - Delete old v3 cache ===
+// === ACTIVATE - Clean old caches ===
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => 
       Promise.all(
         keys.filter(k => k !== CACHE_NAME).map(k => {
-          console.log('[GURU BOSS] Deleting old cache:', k);
+          console.log('[GURU BOSS] Deleting:', k);
           return caches.delete(k);
         })
       )
-    )
+    ).then(()=> self.clients.claim())
   );
-  self.clients.claim(); // Take control of all 3 phones immediately
 });
 
-// === FETCH - Offline First for Boss Version ===
+// === FETCH - Offline First but NEVER cache Supabase ===
 self.addEventListener('fetch', event => {
   const request = event.request;
-  
-  // Only handle GET requests from same origin (your GitHub Pages)
-  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+  const url = request.url;
 
-  // Don't cache Supabase sync calls (when you add them later) - always go network
-  if (request.url.includes('supabase.co') || request.url.includes('rest/v1/')) {
-    return; // Let browser handle it, don't cache
+  // 1. Ignore non-GET
+  if (request.method !== 'GET') return;
+
+  // 2. NEVER intercept Supabase / Live Sync - must go network always
+  if (url.includes('supabase.co') || url.includes('rest/v1') || url.includes('realtime')) {
+    return;
   }
+
+  // 3. Only handle same-origin (GitHub Pages)
+  if (new URL(url).origin !== self.location.origin) return;
 
   event.respondWith(
     fetch(request)
       .then(response => {
-        // If fetch succeeds, cache it for offline use
-        if (response && response.ok) {
+        if (response && response.ok && response.type === 'basic') {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
         }
         return response;
       })
       .catch(async () => {
-        // Offline - try cache
         const cached = await caches.match(request);
         if (cached) return cached;
-        
-        // If navigating (user opens app offline), return index.html with Boss Login
         if (request.mode === 'navigate') {
-          const shell = await caches.match('./index.html');
+          const shell = await caches.match('./index.html') || await caches.match('./');
           if (shell) return shell;
         }
-        
-        // Fallback error
         return Response.error();
       })
   );
 });
 
-// === BACKGROUND SYNC FOR BOSS - 1 Boss + 2 Cashiers ===
-// When cashier sells offline, this will sync when bundles come back
+// === BACKGROUND SYNC - Flushes your pending sales ===
 self.addEventListener('sync', event => {
   if (event.tag === 'guru-boss-sync') {
-    event.waitUntil(
-      (async () => {
-        console.log('[GURU BOSS] Syncing sales for Shop:', await getShopId());
-        // When you add Supabase, sync queued sales here
-        // const queuedSales = JSON.parse(localStorage.getItem('guru_sync_queue') || '[]');
-        // await pushToSupabase(queuedSales);
-      })()
-    );
+    event.waitUntil(flushPendingFromSW());
   }
 });
 
-// Helper to get current Shop ID
-async function getShopId(){
-  // Note: Service worker can't access localStorage directly
-  // We will pass shopId via postMessage from main app later
-  return 'SHOP-GURU-123';
+async function flushPendingFromSW(){
+  // SW cannot read localStorage, so we ask clients (your open tabs)
+  const clients = await self.clients.matchAll({type: 'window'});
+  for (const client of clients){
+    client.postMessage({type: 'FLUSH_PENDING'});
+  }
+  console.log('[GURU BOSS] Asked clients to flush offline sales');
 }
 
-// === MESSAGE HANDLER - For future 3-phone live sync ===
+// === MESSAGE HANDLER ===
+let currentShopId = null;
+
 self.addEventListener('message', event => {
-  if(event.data && event.data.type === 'SKIP_WAITING'){
+  const data = event.data;
+  if(!data) return;
+
+  if(data.type === 'SKIP_WAITING'){
     self.skipWaiting();
   }
-  if(event.data && event.data.type === 'SHOP_ID'){
-    console.log('[GURU BOSS] Shop ID set:', event.data.shopId);
+  if(data.type === 'SHOP_ID'){
+    currentShopId = data.shopId;
+    console.log('[GURU BOSS] Shop ID:', currentShopId);
+  }
+  if(data.type === 'TRIGGER_SYNC'){
+    // Main app tells SW internet is back
+    self.registration.sync.register('guru-boss-sync').catch(()=> flushPendingFromSW());
   }
 });

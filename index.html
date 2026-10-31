@@ -348,6 +348,16 @@ async function initLiveSync(){
   if(elInfo) elInfo.textContent='Live syncing '+shopId;
   if(elLoginLive) elLoginLive.innerHTML='<span class="live-dot live-on"></span>Live ON';
   updatePendingUI();
+  // Tell SW what shop we are
+if(navigator.serviceWorker.controller){
+  navigator.serviceWorker.controller.postMessage({type:'SHOP_ID', shopId: shopId});
+}
+// When online, tell SW to trigger sync
+window.addEventListener('online', ()=>{
+  if(navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'TRIGGER_SYNC'});
+  }
+});
   await flushPending();
   try{
     const {data} = await supabaseClient.from('guru_sync').select('*').eq('shop_id', shopId).order('created_at', {ascending: true}).limit(300);

@@ -333,7 +333,10 @@ async function clearAllData(){if(!await requireAdmin())return;if(!confirm('Clear
 function printReport(){const r=reportData();showReceipt(`${state.settings.shopName} — REPORT\nDate: ${dateText(new Date())}\nSales: ${money(r.total)}\nProfit: ${money(r.profit)}\nExpenses: ${money(r.expenses)}\nNET: ${money(r.net)}`)}
 function printDebts(){const ds=state.debts.filter(d=>d.remaining>0);showReceipt(state.settings.shopName+' — DEBT BOOK\nDate: '+dateText(new Date())+'\n\n'+(ds.map(d=>`${d.customer}: ${money(d.remaining)}`).join('\n')||'No debts')+'\n\nTotal: '+money(ds.reduce((a,d)=>a+d.remaining,0)))}
 function printSales(){const from=$('salesFrom').value,to=$('salesTo').value;const ss=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).reverse();showReceipt(state.settings.shopName+' — SALES\n'+ss.map(s=>`${dateText(s.date)} | ${s.customer} | ${money(s.total)}`).join('\n')+'\n\nTotal: '+money(ss.filter(s=>!s.voided).reduce((a,s)=>a+s.total,0)))}
-
+// AUTO-UPDATE: If new SW found, reload
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{ location.reload(); });
+}
 async function initLiveSync(){
   const elLive=$('liveText'), elInfo=$('syncInfo'), elLoginLive=$('loginLive');
   if(!supabaseClient){

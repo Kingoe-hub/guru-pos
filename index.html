@@ -19,12 +19,50 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
   const SUPABASE_KEY = 'sb_publishable__osC2SU7QjPAu_Z5jwWqDA_TdlX-AF8';
   let supabaseClient=null;
   try{ supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
+  // --- PATCH: OFFLINE QUEUE ---
+  function getPending(){ try{ return JSON.parse(localStorage.getItem('guru_pending_sync')||'[]'); }catch(e){ return []; } }
+  function setPending(arr){ localStorage.setItem('guru_pending_sync', JSON.stringify(arr)); updatePendingUI(); }
+  function addToPending(type,payload){ const a=getPending(); a.push({type, payload, at: new Date().toISOString()}); setPending(a); }
+  function updatePendingUI(){
+    const elInfo=document.getElementById('syncInfo');
+    const pending=getPending();
+    if(pending.length>0 && elInfo){ elInfo.textContent='⚪ Offline — '+pending.length+' pending'; elInfo.style.color='#f97316'; }
+  }
   async function pushToCloud(type,payload){
-    if(!supabaseClient) return;
+    if(!supabaseClient) return false;
+    const shopId=localStorage.getItem('guru_shopId');
+    if(!shopId) return false;
+    if(!navigator.onLine){ addToPending(type,payload); return false; }
+    try{ 
+      const {error} = await supabaseClient.from('guru_sync').insert({shop_id: shopId, type: type, payload: payload});
+      if(error) throw error;
+      return true;
+    }catch(err){ addToPending(type,payload); return false; }
+  }
+  async function flushPending(){
+    if(!supabaseClient || !navigator.onLine) return;
+    const pending=getPending();
+    if(!pending.length) return;
     const shopId=localStorage.getItem('guru_shopId');
     if(!shopId) return;
-    try{ await supabaseClient.from('guru_sync').insert({shop_id: shopId, type: type, payload: payload}); }catch(err){}
+    let remaining=[];
+    for(let item of pending){
+      try{
+        const {error} = await supabaseClient.from('guru_sync').insert({shop_id: shopId, type: item.type, payload: item.payload});
+        if(error) throw error;
+      }catch(e){ remaining.push(item); }
+    }
+    setPending(remaining);
+    const elInfo=document.getElementById('syncInfo');
+    if(elInfo && remaining.length===0){ elInfo.textContent='Live syncing '+shopId; elInfo.style.color=''; }
+    if(pending.length>0 && remaining.length<pending.length){
+      try{ const {data} = await supabaseClient.from('guru_sync').select('*').eq('shop_id', shopId).order('created_at', {ascending: true}).limit(300);
+        if(data){ /* let initLiveSync handle render */ }
+      }catch(e){}
+    }
   }
+  window.addEventListener('online', ()=>{ setTimeout(flushPending, 800); });
+  // --- END PATCH ---
   </script>
   <style>
     :root{--navy:#0a2240;--orange:#f97316;--green:#16a34a;--red:#dc2626;--muted:#64748b;--line:#e2e8f0;--bg:#f3f4f6}
@@ -258,7 +296,15 @@ async function deleteProduct(id){if(!await requireAdmin())return;if(confirm('Del
 function withinRange(date,range){const d=new Date(date),now=new Date();if(range==='today')return d.toDateString()===now.toDateString();if(range==='week'){const from=new Date();from.setDate(from.getDate()-6);from.setHours(0,0,0,0);return d>=from&&d<=now}if(range==='month')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();if(range==='custom'){const from=$('repFrom').value,to=$('repTo').value;return (!from||d>=new Date(from+'T00:00:00'))&&(!to||d<=new Date(to+'T23:59:59'))}return true}
 function reportData(){const range=$('reportRange').value;const inRange=state.sales.filter(s=>withinRange(s.date,range));const ss=inRange.filter(s=>!s.voided);let total=0,profit=0,credit=0,debtIn=0,refunds=0;const best={},rec={cash:0,momo:0,bank:0};ss.forEach(s=>{total+=s.total;profit+=s.profit||0;if(s.method==='credit')credit+=s.total;(s.cart||[]).forEach(c=>best[c.name]=(best[c.name]||0)+c.qty)});inRange.forEach(s=>{if(s.method!=='credit')rec[payKey(s.method)]+=s.total});state.payments.filter(p=>withinRange(p.date,range)).forEach(p=>{rec[payKey(p.method)]+=p.amount;if(p.refund)refunds+=-p.amount;else debtIn+=p.amount});const es=state.expenses.filter(e=>withinRange(e.date,range)),out={cash:0,momo:0,bank:0};let expenses=0;es.forEach(e=>{out[payKey(e.method)]+=e.amount;expenses+=e.amount});return {range,ss,total:round2(total),profit:round2(profit),credit:round2(credit),debtIn:round2(debtIn),refunds:round2(refunds),expenses:round2(expenses),net:round2(profit-expenses),rec,out,best}}
 function renderReports(){const r=reportData();$('repCustom').classList.toggle('hidden',r.range!=='custom');$('rSales').textContent=money(r.total);$('rCount').textContent=r.ss.length+' transactions';$('rProfit').textContent=money(r.profit);$('rMargin').textContent=(r.total?Math.round(r.profit/r.total*100):0)+'% margin';$('rCredit').textContent=money(r.credit);$('rDebtIn').textContent=money(r.debtIn);$('rExp').textContent=money(r.expenses);$('rNet').textContent=money(r.net);const totalIn=r.rec.cash+r.rec.momo+r.rec.bank,totalNet=totalIn-r.expenses;$('receivedList').innerHTML=['cash','momo','bank'].map(k=>`<div class="listrow"><div><span>${METHODS[k]}</span><div class="small">in ${money(r.rec[k])} · exp ${money(r.out[k])}</div></div><strong>${money(r.rec[k]-r.out[k])}</strong></div>`).join('')+`<div class="listrow"><strong>Net in hand</strong><strong>${money(totalNet)}</strong></div>`;const top=Object.entries(r.best).sort((a,b)=>b[1]-a[1]).slice(0,5);$('bestList').innerHTML=top.map(([n,q],i)=>`<div class="listrow"><span>${i+1}. ${esc(n)}</span><strong>${q} sold</strong></div>`).join('')||'<div class="empty">No sales</div>';const low=state.products.filter(p=>p.stock<=3);$('lowList').innerHTML=low.map(p=>`<div class="listrow"><span>${esc(p.name)}</span><span>${p.stock} left <button class="btn orange" onclick="restock('${p.id}')">Restock</button></span></div>`).join('')||'<div class="empty good">All stocked</div>';}
-function renderSales(){const from=$('salesFrom').value,to=$('salesTo').value;const all=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).reverse();const ss=all.slice(0,salesLimit);$('salesList').innerHTML=ss.map(s=>`<div class="listrow"><div><strong class="${s.voided?'strike':''}">${esc(s.customer)} · ${money(s.total)}</strong><div class="small">${esc(METHODS[methodOf(s)])} · ${dateText(s.date)}</div></div><div class="actions"><button class="btn light" onclick="showSaleReceipt('${s.id}')">Receipt</button>${s.voided?'':`<button class="btn red" onclick="voidSale('${s.id}')">Void</button>`}</div></div>`).join('')||'<div class="empty">No sales</div>'}
+function renderSales(){
+  const from=$('salesFrom').value,to=$('salesTo').value;
+  const all=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).reverse();
+  const ss=all.slice(0,salesLimit);
+  $('salesList').innerHTML=ss.map(s=>{
+    const itemsText = (s.cart||[]).map(c=> `${esc(c.name)} x${c.qty}`).join(', ') || (s.items? s.items+' items':'');
+    return `<div class="listrow" style="align-items:flex-start"><div style="flex:1"><strong class="${s.voided?'strike':''}">${esc(s.customer)} · ${money(s.total)}</strong><div class="small" style="color:#334155;margin-top:3px">${esc(itemsText)}</div><div class="small">${esc(METHODS[methodOf(s)])} · ${dateText(s.date)}</div></div><div class="actions"><button class="btn light" onclick="showSaleReceipt('${s.id}')">Receipt</button>${s.voided?'':`<button class="btn red" onclick="voidSale('${s.id}')">Void</button>`}</div></div>`;
+  }).join('')||'<div class="empty">No sales</div>';
+}
 async function voidSale(id){if(!await requireAdmin())return;const s=state.sales.find(s=>s.id===id);if(!s||s.voided)return;const r=await askForm('Void this sale?',[{id:'reason',label:'Reason',type:'text'}],'Void');if(!r)return;(s.cart||[]).forEach(c=>{const p=state.products.find(p=>p.id===c.id);if(p)p.stock+=c.qty});s.voided=true;save();await pushToCloud('stock', state.products);renderAll();}
 function renderDebts(){const q=($('debtSearch').value||'').toLowerCase();const ds=state.debts.filter(d=>Number(d.remaining)>0&&((d.customer||'').toLowerCase().includes(q)||(d.phone||'').includes(q))).sort((a,b)=>new Date(a.date)-new Date(b.date));const owed=state.debts.reduce((s,d)=>s+Math.max(0,Number(d.remaining)||0),0);$('debtSummary').textContent=ds.length+' customers owing · Total '+money(owed);$('debtList').innerHTML=ds.map(d=>`<div class="listrow"><div><strong>${esc(d.customer)} · ${money(d.remaining)}</strong><div class="small">${esc(d.phone||'No phone')} · Original ${money(d.total)}</div></div><div class="actions"><button class="btn green" onclick="recordPayment('${d.id}')">Payment</button><button class="btn light" onclick="remindDebt('${d.id}')">WhatsApp</button></div></div>`).join('')||'<div class="empty">No debts</div>'}
 async function recordPayment(id){const d=state.debts.find(d=>d.id===id);if(!d)return;const r=await askForm('Payment from '+d.customer,[{id:'amount',label:'Amount K - owed '+money(d.remaining),type:'number',value:d.remaining},{id:'method',label:'Paid by',type:'select',value:'cash',options:[['cash','Cash'],['momo','MoMo'],['bank','Bank']]}],'Record');if(!r)return;const amount=round2(r.amount),method=payKey(r.method);if(amount<=0||amount>d.remaining+0.001)return alert('Invalid amount');const now=new Date().toISOString();d.remaining=round2(Math.max(0,d.remaining-amount));d.paid=d.remaining===0;d.payments=d.payments||[];d.payments.push({id:uid(),date:now,amount,method});state.payments.push({id:uid(),debtId:id,customer:d.customer,date:now,amount,method});save();await pushToCloud('debt', state.debts);renderAll();}
@@ -301,11 +347,17 @@ async function initLiveSync(){
   if(elLive) elLive.innerHTML='<span class="live-dot live-on"></span>Live ON - '+shopId;
   if(elInfo) elInfo.textContent='Live syncing '+shopId;
   if(elLoginLive) elLoginLive.innerHTML='<span class="live-dot live-on"></span>Live ON';
+  updatePendingUI();
+  await flushPending();
   try{
     const {data} = await supabaseClient.from('guru_sync').select('*').eq('shop_id', shopId).order('created_at', {ascending: true}).limit(300);
     if(data && data.length){
       data.filter(d=>d.type==='sale').forEach(d=>{
         if(!state.sales.find(s=>s.id===d.payload.id)){ state.sales.push(d.payload); }
+      });
+      data.filter(d=>d.type==='stock' && Array.isArray(d.payload)).forEach(d=>{
+        const incoming = d.payload;
+        if(incoming.length > state.products.length){ state.products = incoming; }
       });
       save(); renderAll();
     }

@@ -181,6 +181,16 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
     </div>
     <label class="small">Shop ID</label>
     <input id="shopIdInput" class="boss-input" placeholder="SHOP-GURU-123">
+    <!-- GURU BRANCH PATCH START -->
+    <label class="small">Branch / Outlet</label>
+    <select id="branchInput" class="boss-input">
+      <option value="ALL">👔 OWNER - See All Branches</option>
+      <option value="BRANCH-1">Branch 1 - Main Market</option>
+      <option value="BRANCH-2">Branch 2 - Hospital</option>
+      <option value="BRANCH-3">Branch 3 - School</option>
+      <option value="BRANCH-4">Branch 4 - Station</option>
+    </select>
+    <!-- GURU BRANCH PATCH END -->
     <div style="display:flex;gap:8px">
       <button class="btn light" style="flex:1;background:#374151;color:#fff" onclick="window.genShopIdNow()">🔄 Generate ID</button>
       <button class="qr-btn" style="flex:1" onclick="alert('Boss Pro: QR Scan coming soon')">📷 Scan QR</button>
@@ -200,6 +210,19 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
   </aside>
   <main class="main">
     <div class="heading"><h1 id="pageTitle">Sell</h1><input id="search" class="search" placeholder="Search products…" oninput="renderProducts()"></div>
+    <!-- GURU BRANCH PATCH START - Branch Switcher for Owner -->
+    <div id="branchSwitcher" style="display:none;margin-bottom:12px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px">
+      <label class="small" style="font-weight:700;color:#0a2240">Viewing Branch: </label>
+      <select id="branchFilter" class="field" style="width:auto;display:inline-block;margin:0" onchange="window.setBranchFilter(this.value)">
+        <option value="ALL">All Branches (Owner)</option>
+        <option value="BRANCH-1">Branch 1 - Main Market</option>
+        <option value="BRANCH-2">Branch 2 - Hospital</option>
+        <option value="BRANCH-3">Branch 3 - School</option>
+        <option value="BRANCH-4">Branch 4 - Station</option>
+      </select>
+      <span id="branchLabel" class="small" style="margin-left:8px"></span>
+    </div>
+    <!-- GURU BRANCH PATCH END -->
     <div id="notice" class="notice"></div>
     <section id="page-sell"><div id="productGrid" class="cards"></div></section>
     <section id="page-stock" class="hidden">
@@ -250,6 +273,14 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
 <script>
 window.BOSS_ROLE = localStorage.getItem('guru_role') || 'owner';
 window.getDBKey = function(){ const shop = localStorage.getItem('guru_shopId'); return shop ? 'guru_pos_v3_data_' + shop : 'guru_pos_v3_data'; }
+// GURU BRANCH PATCH START - Helpers
+window.getMyBranch = function(){ return localStorage.getItem('guru_branch') || 'ALL'; }
+window.getBranchFilter = function(){ const f = localStorage.getItem('guru_branch_filter'); if(f) return f; return window.getMyBranch(); }
+window.setBranchFilter = function(v){ localStorage.setItem('guru_branch_filter', v); renderAll(); const el=document.getElementById('branchFilter'); if(el) el.value=v; const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = v==='ALL' ? 'Showing ALL branches' : 'Showing '+v+' only'; }
+window.branchOf = function(item){ return item.branch || 'BRANCH-1'; }
+window.passesBranch = function(item){ const f = window.getBranchFilter(); if(f==='ALL') return true; return window.branchOf(item)===f; }
+window.passesBranchForCashier = function(item){ const my = window.getMyBranch(); if(my==='ALL') return true; return window.branchOf(item)===my; }
+// GURU BRANCH PATCH END
 window.setBossRole = function(r){
   window.BOSS_ROLE = r;
   const o=document.getElementById('ownerBtn'), c=document.getElementById('cashierBtn');
@@ -275,6 +306,12 @@ window.doBossLoginNow = function(){
   localStorage.setItem('guru_shopId', shop);
   localStorage.setItem('guru_pin', pin);
   localStorage.setItem('guru_current_shop', shop);
+  // GURU BRANCH PATCH START - Save branch
+  const branchEl=document.getElementById('branchInput');
+  const branch = branchEl ? branchEl.value : 'ALL';
+  localStorage.setItem('guru_branch', branch);
+  localStorage.setItem('guru_branch_filter', branch);
+  // GURU BRANCH PATCH END
   document.getElementById('bossLogin').style.display='none';
   location.reload();
 }
@@ -282,6 +319,10 @@ window.bossLogoutNow = function(){
   if(confirm('Switch shop / logout?')){
     localStorage.removeItem('guru_role');
     localStorage.removeItem('guru_shopId');
+    // GURU BRANCH PATCH START
+    localStorage.removeItem('guru_branch');
+    localStorage.removeItem('guru_branch_filter');
+    // GURU BRANCH PATCH END
     location.reload();
   }
 }
@@ -298,12 +339,20 @@ function initBossUI(){
   const badge=document.getElementById('roleBadge');
   const cur=document.getElementById('currentShopId');
   if(badge) badge.textContent=role==='owner'?'OWNER':'CASHIER';
-  if(cur) cur.textContent=shop+' • '+role.toUpperCase();
+  if(cur) cur.textContent=shop+' • '+role.toUpperCase()+' • '+(localStorage.getItem('guru_branch')||'ALL');
   if(role==='cashier'){
     document.querySelectorAll('[data-page="reports"],[data-page="expenses"],[data-page="backup"]').forEach(b=>b.style.display='none');
   }
   const pinInput=document.getElementById('bossPin');
   if(pinInput){ pinInput.addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,4); }); }
+  // GURU BRANCH PATCH START - Show switcher only for Owner/ALL
+  const sw=document.getElementById('branchSwitcher');
+  const bf=document.getElementById('branchFilter');
+  if(sw){
+    if(window.getMyBranch()==='ALL'){ sw.style.display='block'; if(bf) bf.value=window.getBranchFilter(); const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = window.getBranchFilter()==='ALL' ? 'Showing ALL branches' : 'Showing '+window.getBranchFilter()+' only'; }
+    else { sw.style.display='none'; }
+  }
+  // GURU BRANCH PATCH END
 }
 initBossUI();
 </script>
@@ -312,7 +361,7 @@ initBossUI();
 'use strict';
 const METHODS={cash:'Cash',momo:'Mobile money',bank:'Bank',credit:'Credit'};
 const DEFAULT_SETTINGS={shopName:'GURU POS',tagline:'#YouNameItWeSuply',phone:'0977704769',footer:'Thank you for shopping with us!',pinSalt:'',pinHash:'',lastBackup:''};
-const DEFAULT_PRODUCTS=[{id:uid(),name:'CALUS Speaker',price:850,cost:600,stock:15},{id:uid(),name:'Samsung A07',price:3200,cost:2800,stock:5},{id:uid(),name:'Samsung A16',price:4500,cost:3900,stock:3},{id:uid(),name:'iPhone Case',price:120,cost:40,stock:40},{id:uid(),name:'Bluetooth Headset',price:250,cost:120,stock:20},{id:uid(),name:'Standing Fan',price:950,cost:700,stock:6}];
+const DEFAULT_PRODUCTS=[{id:uid(),name:'CALUS Speaker',price:850,cost:600,stock:15,branch:'BRANCH-1'},{id:uid(),name:'Samsung A07',price:3200,cost:2800,stock:5,branch:'BRANCH-1'},{id:uid(),name:'Samsung A16',price:4500,cost:3900,stock:3,branch:'BRANCH-1'},{id:uid(),name:'iPhone Case',price:120,cost:40,stock:40,branch:'BRANCH-1'},{id:uid(),name:'Bluetooth Headset',price:250,cost:120,stock:20,branch:'BRANCH-1'},{id:uid(),name:'Standing Fan',price:950,cost:700,stock:6,branch:'BRANCH-1'}];
 const $=id=>document.getElementById(id);
 let state=loadState(),cart=[],adminUntil=0,salesLimit=50,pinFails=0,pinLockedUntil=0;
 function uid(){return (crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));}
@@ -364,7 +413,7 @@ async function forgotPin(){const r=await askForm('Reset PIN',[{id:'key',label:'Y
 function showPage(page){document.querySelectorAll('main section[id^="page-"]').forEach(e=>e.classList.add('hidden'));$('page-'+page).classList.remove('hidden');$('pageTitle').textContent=({sell:'Sell',stock:'Stock management',sales:'Sales history',reports:'Reports',expenses:'Expenses',debts:'Debt book',backup:'Backup & settings'})[page]||page;document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('search').classList.toggle('hidden',page!=='sell');if(page==='stock')renderStock();if(page==='sales')renderSales();if(page==='reports')renderReports();if(page==='expenses'){if(!$('eDate').value)$('eDate').value=localDate();renderExpenses()}if(page==='debts')renderDebts();if(page==='sell')renderProducts();if(page==='backup')fillSettings();}
 function openCart(){if(innerWidth<=1050){renderCart();$('cartOverlay').classList.remove('hidden')}else document.querySelector('.cartpanel').scrollIntoView({behavior:'smooth'})}
 function closeCart(){$('cartOverlay').classList.add('hidden')}
-function renderProducts(){const q=($('search').value||'').toLowerCase();const ps=state.products.filter(p=>p.name.toLowerCase().includes(q));$('productGrid').innerHTML=ps.map(p=>`<article class="product"><div class="row"><h3>${esc(p.name)}</h3><span class="pill ${p.stock<=3?'low':''}">${p.stock<=0?'OUT':p.stock+' left'}</span></div><div class="price">${money(p.price)}</div><div class="small">Profit: ${money(p.price-p.cost)}</div><button class="btn primary full" ${p.stock<=0?'disabled':''} onclick="addToCart('${p.id}')">${p.stock<=0?'Out of stock':'Add to cart'}</button></article>`).join('')||'<div class="empty">No matching products.</div>';}
+function renderProducts(){const q=($('search').value||'').toLowerCase();const ps=state.products.filter(p=>p.name.toLowerCase().includes(q)).filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p));$('productGrid').innerHTML=ps.map(p=>`<article class="product"><div class="row"><h3>${esc(p.name)}</h3><span class="pill ${p.stock<=3?'low':''}">${p.stock<=0?'OUT':p.stock+' left'}</span></div><div class="price">${money(p.price)}</div><div class="small">Profit: ${money(p.price-p.cost)} · ${esc(window.branchOf(p))}</div><button class="btn primary full" ${p.stock<=0?'disabled':''} onclick="addToCart('${p.id}')">${p.stock<=0?'Out of stock':'Add to cart'}</button></article>`).join('')||'<div class="empty">No matching products.</div>';}
 function addToCart(id){const p=state.products.find(p=>p.id===id);if(!p||p.stock<=0)return alert('Out of stock.');const c=cart.find(c=>c.id===id);const qty=c?c.qty:0;if(qty>=p.stock)return alert('Cannot exceed stock.');if(c)c.qty++;else cart.push({id,name:p.name,price:p.price,cost:p.cost,qty:1});renderCart();if(innerWidth<=1050)openCart();}
 function cartMarkup(){return cart.map(c=>`<div class="cartline"><div class="row"><strong>${esc(c.name)}</strong><button class="btn light" onclick="removeCart('${c.id}')">Remove</button></div><div class="row"><span class="small">Price <input class="field pricein" type="number" min="0.01" step="0.01" value="${c.price}" onchange="setPrice('${c.id}',this.value)"></span><div class="actions"><button class="btn light" onclick="changeQty('${c.id}',-1)">−</button><strong>${c.qty}</strong><button class="btn light" onclick="changeQty('${c.id}',1)">+</button></div></div><div class="right small">${money(c.price*c.qty)}</div></div>`).join('')||'<div class="empty">Cart is empty.</div>'}
 function cartTotal(){return round2(cart.reduce((s,c)=>s+c.price*c.qty,0))}
@@ -383,10 +432,10 @@ async function checkout(kind){
   if(kind==='credit'&&!customer.name)return alert('Enter customer name for credit.');
   const method=kind==='credit'?'credit':payKey($('payMethod').value);
   const total=cartTotal(),profit=round2(cart.reduce((s,c)=>s+(c.price-c.cost)*c.qty,0));
-  const record={id:uid(),date:new Date().toISOString(),customer:customer.name||'Walk-in',phone:customer.phone,method,total,profit,items:cart.reduce((s,c)=>s+c.qty,0),cart:cart.map(c=>({...c})),shop_id:localStorage.getItem('guru_shopId')};
+  const record={id:uid(),date:new Date().toISOString(),customer:customer.name||'Walk-in',phone:customer.phone,method,total,profit,items:cart.reduce((s,c)=>s+c.qty,0),cart:cart.map(c=>({...c})),shop_id:localStorage.getItem('guru_shopId'),branch: window.getMyBranch()==='ALL' ? window.getBranchFilter()==='ALL' ? 'BRANCH-1' : window.getBranchFilter() : window.getMyBranch()};
   let debtObj=null;
   if(method==='credit'){
-    debtObj={id:uid(),saleId:record.id,date:record.date,customer:customer.name,phone:customer.phone,total,remaining:total,items:record.items,cart:record.cart,paid:false,payments:[]};
+    debtObj={id:uid(),saleId:record.id,date:record.date,customer:customer.name,phone:customer.phone,total,remaining:total,items:record.items,cart:record.cart,paid:false,payments:[],branch:record.branch};
     state.debts.push(debtObj);
   }
   state.sales.push(record);
@@ -398,7 +447,7 @@ async function checkout(kind){
   const receipt=receiptText(record);cart=[];renderAll();clearCustomer();closeCart();
   if(kind==='whatsapp'){if(!customer.phone){showReceipt(receipt);return}openWhatsApp(customer.phone,receipt)}else showReceipt(receipt)
 }
-function receiptText(s){const st=state.settings;return `${st.shopName}\n${st.tagline}\n${st.phone}\n--------------------------------\n${s.voided?'*** VOIDED ***\n':''}Receipt: ${s.id.slice(0,8)}\nDate: ${dateText(s.date)}\nCustomer: ${s.customer}\n--------------------------------\n${s.cart.map(c=>`${c.name}\n ${c.qty} x ${money(c.price)} = ${money(c.qty*c.price)}`).join('\n')}\n--------------------------------\nTOTAL: ${money(s.total)}\nPaid by: ${METHODS[methodOf(s)].toUpperCase()}\n${st.footer}`}
+function receiptText(s){const st=state.settings;return `${st.shopName}\n${st.tagline}\n${st.phone}\nBranch: ${s.branch||window.branchOf(s)}\n--------------------------------\n${s.voided?'*** VOIDED ***\n':''}Receipt: ${s.id.slice(0,8)}\nDate: ${dateText(s.date)}\nCustomer: ${s.customer}\n--------------------------------\n${s.cart.map(c=>`${c.name}\n ${c.qty} x ${money(c.price)} = ${money(c.qty*c.price)}`).join('\n')}\n--------------------------------\nTOTAL: ${money(s.total)}\nPaid by: ${METHODS[methodOf(s)].toUpperCase()}\n${st.footer}`}
 function showSaleReceipt(id){const s=state.sales.find(s=>s.id===id);if(s)showReceipt(receiptText(s))}
 function openWhatsApp(phone,msg){let n=phone.replace(/\D/g,'');if(n.startsWith('0'))n='260'+n.slice(1);else if(!n.startsWith('260'))n='260'+n;window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank','noopener')}
 $('productForm').addEventListener('submit',async e=>{
@@ -406,13 +455,13 @@ $('productForm').addEventListener('submit',async e=>{
   if(!await requireAdmin())return;
   const name=$('pName').value.trim(),cost=Number($('pCost').value),price=Number($('pPrice').value),stock=Number($('pQty').value);
   if(!name||cost<0||price<=0||stock<0)return alert('Invalid');
-  state.products.push({id:uid(),name,cost,price,stock});
+  state.products.push({id:uid(),name,cost,price,stock,branch: window.getMyBranch()==='ALL' ? (window.getBranchFilter()==='ALL' ? 'BRANCH-1' : window.getBranchFilter()) : window.getMyBranch()});
   save(); 
   await pushToCloud('stock', state.products);
   e.target.reset();
   renderAll()
 });
-function renderStock(){$('stockCount').textContent=state.products.length+' products';$('stockList').innerHTML=state.products.map(p=>`<div class="listrow"><div><strong>${esc(p.name)}</strong><div class="small">Cost ${money(p.cost)} · Sell ${money(p.price)} · Qty ${p.stock}</div></div><div class="actions"><button class="btn orange" onclick="restock('${p.id}')">Restock</button><button class="btn light" onclick="editProduct('${p.id}')">Edit</button><button class="btn red" onclick="deleteProduct('${p.id}')">×</button></div></div>`).join('')||'<div class="empty">No products</div>'}
+function renderStock(){$('stockCount').textContent=state.products.filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p)).length+' products';$('stockList').innerHTML=state.products.filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p)).map(p=>`<div class="listrow"><div><strong>${esc(p.name)}</strong><div class="small">Cost ${money(p.cost)} · Sell ${money(p.price)} · Qty ${p.stock} · ${esc(window.branchOf(p))}</div></div><div class="actions"><button class="btn orange" onclick="restock('${p.id}')">Restock</button><button class="btn light" onclick="editProduct('${p.id}')">Edit</button><button class="btn red" onclick="deleteProduct('${p.id}')">×</button></div></div>`).join('')||'<div class="empty">No products</div>'}
 async function restock(id){
   if(!await requireAdmin())return;
   const p=state.products.find(p=>p.id===id);if(!p)return;
@@ -441,23 +490,23 @@ async function deleteProduct(id){
   }
 }
 function withinRange(date,range){const d=new Date(date),now=new Date();if(range==='today')return d.toDateString()===now.toDateString();if(range==='week'){const from=new Date();from.setDate(from.getDate()-6);from.setHours(0,0,0,0);return d>=from&&d<=now}if(range==='month')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();if(range==='custom'){const from=$('repFrom').value,to=$('repTo').value;return (!from||d>=new Date(from+'T00:00:00'))&&(!to||d<=new Date(to+'T23:59:59'))}return true}
-function reportData(){const range=$('reportRange').value;const inRange=state.sales.filter(s=>withinRange(s.date,range));const ss=inRange.filter(s=>!s.voided);let total=0,profit=0,credit=0,debtIn=0,refunds=0;const best={},rec={cash:0,momo:0,bank:0};ss.forEach(s=>{total+=s.total;profit+=s.profit||0;if(s.method==='credit')credit+=s.total;(s.cart||[]).forEach(c=>best[c.name]=(best[c.name]||0)+c.qty)});inRange.forEach(s=>{if(s.method!=='credit')rec[payKey(s.method)]+=s.total});state.payments.filter(p=>withinRange(p.date,range)).forEach(p=>{rec[payKey(p.method)]+=p.amount;if(p.refund)refunds+=-p.amount;else debtIn+=p.amount});const es=state.expenses.filter(e=>withinRange(e.date,range)),out={cash:0,momo:0,bank:0};let expenses=0;es.forEach(e=>{out[payKey(e.method)]+=e.amount;expenses+=e.amount});return {range,ss,total:round2(total),profit:round2(profit),credit:round2(credit),debtIn:round2(debtIn),refunds:round2(refunds),expenses:round2(expenses),net:round2(profit-expenses),rec,out,best}}
+function reportData(){const range=$('reportRange').value;const inRange=state.sales.filter(s=>withinRange(s.date,range)).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s));const ss=inRange.filter(s=>!s.voided);let total=0,profit=0,credit=0,debtIn=0,refunds=0;const best={},rec={cash:0,momo:0,bank:0};ss.forEach(s=>{total+=s.total;profit+=s.profit||0;if(s.method==='credit')credit+=s.total;(s.cart||[]).forEach(c=>best[c.name]=(best[c.name]||0)+c.qty)});inRange.forEach(s=>{if(s.method!=='credit')rec[payKey(s.method)]+=s.total});state.payments.filter(p=>withinRange(p.date,range)).filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p)).forEach(p=>{rec[payKey(p.method)]+=p.amount;if(p.refund)refunds+=-p.amount;else debtIn+=p.amount});const es=state.expenses.filter(e=>withinRange(e.date,range)).filter(e=>window.passesBranchForCashier(e)).filter(e=>window.passesBranch(e)),out={cash:0,momo:0,bank:0};let expenses=0;es.forEach(e=>{out[payKey(e.method)]+=e.amount;expenses+=e.amount});return {range,ss,total:round2(total),profit:round2(profit),credit:round2(credit),debtIn:round2(debtIn),refunds:round2(refunds),expenses:round2(expenses),net:round2(profit-expenses),rec,out,best}}
 function renderReports(){
   const r=reportData();
   const customBox = document.getElementById('repCustom');
   if(customBox){ customBox.style.display='grid'; }
-  $('rSales').textContent=money(r.total);$('rCount').textContent=r.ss.length+' transactions';$('rProfit').textContent=money(r.profit);$('rMargin').textContent=(r.total?Math.round(r.profit/r.total*100):0)+'% margin';$('rCredit').textContent=money(r.credit);$('rDebtIn').textContent=money(r.debtIn);$('rExp').textContent=money(r.expenses);$('rNet').textContent=money(r.net);const totalIn=r.rec.cash+r.rec.momo+r.rec.bank,totalNet=totalIn-r.expenses;$('receivedList').innerHTML=['cash','momo','bank'].map(k=>`<div class="listrow"><div><span>${METHODS[k]}</span><div class="small">in ${money(r.rec[k])} · exp ${money(r.out[k])}</div></div><strong>${money(r.rec[k]-r.out[k])}</strong></div>`).join('')+`<div class="listrow"><strong>Net in hand</strong><strong>${money(totalNet)}</strong></div>`;const top=Object.entries(r.best).sort((a,b)=>b[1]-a[1]).slice(0,5);$('bestList').innerHTML=top.map(([n,q],i)=>`<div class="listrow"><span>${i+1}. ${esc(n)}</span><strong>${q} sold</strong></div>`).join('')||'<div class="empty">No sales</div>';const low=state.products.filter(p=>p.stock<=3);$('lowList').innerHTML=low.map(p=>`<div class="listrow"><span>${esc(p.name)}</span><span>${p.stock} left <button class="btn orange" onclick="restock('${p.id}')">Restock</button></span></div>`).join('')||'<div class="empty good">All stocked</div>';}
+  $('rSales').textContent=money(r.total);$('rCount').textContent=r.ss.length+' transactions';$('rProfit').textContent=money(r.profit);$('rMargin').textContent=(r.total?Math.round(r.profit/r.total*100):0)+'% margin';$('rCredit').textContent=money(r.credit);$('rDebtIn').textContent=money(r.debtIn);$('rExp').textContent=money(r.expenses);$('rNet').textContent=money(r.net);const totalIn=r.rec.cash+r.rec.momo+r.rec.bank,totalNet=totalIn-r.expenses;$('receivedList').innerHTML=['cash','momo','bank'].map(k=>`<div class="listrow"><div><span>${METHODS[k]}</span><div class="small">in ${money(r.rec[k])} · exp ${money(r.out[k])}</div></div><strong>${money(r.rec[k]-r.out[k])}</strong></div>`).join('')+`<div class="listrow"><strong>Net in hand</strong><strong>${money(totalNet)}</strong></div>`;const top=Object.entries(r.best).sort((a,b)=>b[1]-a[1]).slice(0,5);$('bestList').innerHTML=top.map(([n,q],i)=>`<div class="listrow"><span>${i+1}. ${esc(n)}</span><strong>${q} sold</strong></div>`).join('')||'<div class="empty">No sales</div>';const low=state.products.filter(p=>p.stock<=3).filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p));$('lowList').innerHTML=low.map(p=>`<div class="listrow"><span>${esc(p.name)}</span><span>${p.stock} left <button class="btn orange" onclick="restock('${p.id}')">Restock</button></span></div>`).join('')||'<div class="empty good">All stocked</div>';}
 function renderSales(){
   const from=$('salesFrom').value,to=$('salesTo').value;
-  const all=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).reverse();
+  const all=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s)).reverse();
   const ss=all.slice(0,salesLimit);
   $('salesList').innerHTML=ss.map(s=>{
     const itemsText = (s.cart||[]).map(c=> `${esc(c.name)} x${c.qty}`).join(', ') || (s.items? s.items+' items':'');
-    return `<div class="listrow" style="align-items:flex-start"><div style="flex:1"><strong class="${s.voided?'strike':''}">${esc(s.customer)} · ${money(s.total)}</strong><div class="small" style="color:#334155;margin-top:3px">${esc(itemsText)}</div><div class="small">${esc(METHODS[methodOf(s)])} · ${dateText(s.date)}</div></div><div class="actions"><button class="btn light" onclick="showSaleReceipt('${s.id}')">Receipt</button>${s.voided?'':`<button class="btn red" onclick="voidSale('${s.id}')">Void</button>`}</div></div>`;
+    return `<div class="listrow" style="align-items:flex-start"><div style="flex:1"><strong class="${s.voided?'strike':''}">${esc(s.customer)} · ${money(s.total)} · ${esc(window.branchOf(s))}</strong><div class="small" style="color:#334155;margin-top:3px">${esc(itemsText)}</div><div class="small">${esc(METHODS[methodOf(s)])} · ${dateText(s.date)}</div></div><div class="actions"><button class="btn light" onclick="showSaleReceipt('${s.id}')">Receipt</button>${s.voided?'':`<button class="btn red" onclick="voidSale('${s.id}')">Void</button>`}</div></div>`;
   }).join('')||'<div class="empty">No sales</div>';
 }
 async function voidSale(id){if(!await requireAdmin())return;const s=state.sales.find(s=>s.id===id);if(!s||s.voided)return;const r=await askForm('Void this sale?',[{id:'reason',label:'Reason',type:'text'}],'Void');if(!r)return;(s.cart||[]).forEach(c=>{const p=state.products.find(p=>p.id===c.id);if(p)p.stock+=c.qty});s.voided=true;save();renderAll();}
-function renderDebts(){const q=($('debtSearch').value||'').toLowerCase();const ds=state.debts.filter(d=>Number(d.remaining)>0&&((d.customer||'').toLowerCase().includes(q)||(d.phone||'').includes(q))).sort((a,b)=>new Date(a.date)-new Date(b.date));const owed=state.debts.reduce((s,d)=>s+Math.max(0,Number(d.remaining)||0),0);$('debtSummary').textContent=ds.length+' customers owing · Total '+money(owed);$('debtList').innerHTML=ds.map(d=>`<div class="listrow"><div><strong>${esc(d.customer)} · ${money(d.remaining)}</strong><div class="small">${esc(d.phone||'No phone')} · Original ${money(d.total)}</div></div><div class="actions"><button class="btn green" onclick="recordPayment('${d.id}')">Payment</button><button class="btn light" onclick="remindDebt('${d.id}')">WhatsApp</button></div></div>`).join('')||'<div class="empty">No debts</div>'}
+function renderDebts(){const q=($('debtSearch').value||'').toLowerCase();const ds=state.debts.filter(d=>Number(d.remaining)>0&&((d.customer||'').toLowerCase().includes(q)||(d.phone||'').includes(q))).filter(d=>window.passesBranchForCashier(d)).filter(d=>window.passesBranch(d)).sort((a,b)=>new Date(a.date)-new Date(b.date));const owed=state.debts.filter(d=>window.passesBranchForCashier(d)).filter(d=>window.passesBranch(d)).reduce((s,d)=>s+Math.max(0,Number(d.remaining)||0),0);$('debtSummary').textContent=ds.length+' customers owing · Total '+money(owed);$('debtList').innerHTML=ds.map(d=>`<div class="listrow"><div><strong>${esc(d.customer)} · ${money(d.remaining)}</strong><div class="small">${esc(d.phone||'No phone')} · Original ${money(d.total)} · ${esc(window.branchOf(d))}</div></div><div class="actions"><button class="btn green" onclick="recordPayment('${d.id}')">Payment</button><button class="btn light" onclick="remindDebt('${d.id}')">WhatsApp</button></div></div>`).join('')||'<div class="empty">No debts</div>'}
 async function recordPayment(id){
   const d=state.debts.find(d=>d.id===id);if(!d)return;
   const r=await askForm('Payment from '+d.customer,[{id:'amount',label:'Amount K - owed '+money(d.remaining),type:'number',value:d.remaining},{id:'method',label:'Paid by',type:'select',value:'cash',options:[['cash','Cash'],['momo','MoMo'],['bank','Bank']]}],'Record');
@@ -468,7 +517,7 @@ async function recordPayment(id){
   d.remaining=round2(Math.max(0,d.remaining-amount));
   d.paid=d.remaining===0;
   d.payments=d.payments||[];
-  const payRec={id:uid(),debtId:id,saleId:d.saleId,customer:d.customer,date:now,amount,method};
+  const payRec={id:uid(),debtId:id,saleId:d.saleId,customer:d.customer,date:now,amount,method,branch: d.branch || window.branchOf(d)};
   d.payments.push(payRec);
   state.payments.push(payRec);
   save(); renderAll();
@@ -479,11 +528,11 @@ function remindDebt(id){const d=state.debts.find(d=>d.id===id);if(!d.phone)retur
 function renderNotice(){const el=$('notice'),lb=state.settings.lastBackup;if(!lb){el.className='notice';el.textContent='No backup yet. Save backup in Backup & settings.';return}const days=Math.floor((Date.now()-new Date(lb))/864e5);el.className='notice'+(days>7?'':' ok');el.textContent=days>7?'Last backup '+days+' days ago.':'Last backup today.';}
 const EXP_CATS=['Rent','Transport','Electricity & airtime','Wages','Repairs','Marketing','Other'];
 function localDate(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
-$('expenseForm').addEventListener('submit',async e=>{e.preventDefault();if(!await requireAdmin())return;const amount=round2($('eAmount').value),ds=$('eDate').value||localDate();const date=ds===localDate()?new Date().toISOString():new Date(ds+'T12:00:00').toISOString();state.expenses.push({id:uid(),date,category:$('eCat').value||'Other',amount,method:payKey($('eMethod').value),note:$('eNote').value.trim()});if(!save())return;$('eAmount').value='';$('eNote').value='';renderAll()});
-function renderExpenses(){if(!$('eCat').innerHTML)$('eCat').innerHTML=EXP_CATS.map(c=>`<option>${esc(c)}</option>`).join('');const es=state.expenses.filter(e=>withinRange(e.date,$('expRange').value)).sort((a,b)=>new Date(b.date)-new Date(a.date));const total=es.reduce((s,e)=>s+e.amount,0);$('expSummary').textContent=es.length+' expense(s) · Total '+money(total);$('expList').innerHTML=es.slice(0,100).map(e=>`<div class="listrow"><div><strong>${esc(e.category)} · ${money(e.amount)}</strong><div class="small">${new Date(e.date).toLocaleDateString()}</div></div><button class="btn red" onclick="deleteExpense('${e.id}')">×</button></div>`).join('')||'<div class="empty">No expenses</div>'}
+$('expenseForm').addEventListener('submit',async e=>{e.preventDefault();if(!await requireAdmin())return;const amount=round2($('eAmount').value),ds=$('eDate').value||localDate();const date=ds===localDate()?new Date().toISOString():new Date(ds+'T12:00:00').toISOString();state.expenses.push({id:uid(),date,category:$('eCat').value||'Other',amount,method:payKey($('eMethod').value),note:$('eNote').value.trim(),branch: window.getMyBranch()==='ALL' ? window.getBranchFilter() : window.getMyBranch()});if(!save())return;$('eAmount').value='';$('eNote').value='';renderAll()});
+function renderExpenses(){if(!$('eCat').innerHTML)$('eCat').innerHTML=EXP_CATS.map(c=>`<option>${esc(c)}</option>`).join('');const es=state.expenses.filter(e=>withinRange(e.date,$('expRange').value)).filter(e=>window.passesBranchForCashier(e)).filter(e=>window.passesBranch(e)).sort((a,b)=>new Date(b.date)-new Date(a.date));const total=es.reduce((s,e)=>s+e.amount,0);$('expSummary').textContent=es.length+' expense(s) · Total '+money(total);$('expList').innerHTML=es.slice(0,100).map(e=>`<div class="listrow"><div><strong>${esc(e.category)} · ${money(e.amount)}</strong><div class="small">${new Date(e.date).toLocaleDateString()} · ${esc(window.branchOf(e))}</div></div><button class="btn red" onclick="deleteExpense('${e.id}')">×</button></div>`).join('')||'<div class="empty">No expenses</div>'}
 async function deleteExpense(id){if(!await requireAdmin())return;if(confirm('Delete expense?')){state.expenses=state.expenses.filter(x=>x.id!==id);save();renderAll()}}
 function exportExpensesCSV(){const rows=[['Date','Category','Amount K','Paid by','Note'],...state.expenses.map(e=>[e.date,e.category,e.amount,METHODS[payKey(e.method)],e.note])];download('guru-pos-expenses.csv',rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8')}
-function renderAll(){renderProducts();renderCart();renderStock();renderSales();renderDebts();renderReports();renderExpenses();renderNotice();const st=state.settings;$('brandTop').innerHTML='GURU <span>POS</span> <small id="roleBadge" style="background:#f97316;padding:2px 8px;border-radius:20px;font-size:10px;margin-left:6px">'+(localStorage.getItem('guru_role')||'BOSS').toUpperCase()+'</small>';$('taglineTop').innerHTML='#YouNameItWeSuply · v4.3 Boss AUTO • <span id="currentShopId">'+(localStorage.getItem('guru_shopId')||'')+'</span> • <span id="liveText"><span class="live-dot '+(supabaseClient?'live-on':'live-off')+'"></span>'+(supabaseClient?'Live ON':'Offline')+'</span>';document.title=st.shopName+' — Sales & Stock';const today=state.sales.filter(s=>!s.voided&&todayKey(s.date)===todayKey());$('sideToday').textContent=money(today.reduce((s,x)=>s+x.total,0));$('sideDebt').textContent=money(state.debts.reduce((s,d)=>s+Math.max(0,d.remaining||0),0));}
+function renderAll(){renderProducts();renderCart();renderStock();renderSales();renderDebts();renderReports();renderExpenses();renderNotice();const st=state.settings;$('brandTop').innerHTML='GURU <span>POS</span> <small id="roleBadge" style="background:#f97316;padding:2px 8px;border-radius:20px;font-size:10px;margin-left:6px">'+(localStorage.getItem('guru_role')||'BOSS').toUpperCase()+'</small>';$('taglineTop').innerHTML='#YouNameItWeSuply · v4.3 Boss AUTO • <span id="currentShopId">'+(localStorage.getItem('guru_shopId')||'')+'</span> • <span id="liveText"><span class="live-dot '+(supabaseClient?'live-on':'live-off')+'"></span>'+(supabaseClient?'Live ON':'Offline')+'</span>';document.title=st.shopName+' — Sales & Stock';const today=state.sales.filter(s=>!s.voided&&todayKey(s.date)===todayKey()).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s));$('sideToday').textContent=money(today.reduce((s,x)=>s+x.total,0));$('sideDebt').textContent=money(state.debts.filter(d=>window.passesBranchForCashier(d)).filter(d=>window.passesBranch(d)).reduce((s,d)=>s+Math.max(0,d.remaining||0),0));}
 function fillSettings(){const s=state.settings;$('sName').value=s.shopName;$('sTagline').value=s.tagline;$('sPhone').value=s.phone;$('sFooter').value=s.footer}
 $('settingsForm').addEventListener('submit',async e=>{e.preventDefault();if(!await requireAdmin())return;const s=state.settings;s.shopName=$('sName').value.trim()||'GURU POS';s.tagline=$('sTagline').value.trim();s.phone=$('sPhone').value.trim();s.footer=$('sFooter').value.trim();save();renderAll();alert('Settings saved.')});
 function download(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
@@ -492,9 +541,9 @@ function exportSalesCSV(){const rows=[['Date','Receipt ID','Customer','Phone','M
 function exportStockCSV(){const rows=[['Product','Cost K','Selling price K','Profit per item K','Stock'],...state.products.map(p=>[p.name,p.cost,p.price,p.price-p.cost,p.stock])];download('guru-pos-stock.csv',rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8')}
 async function restoreBackup(){if(!await requireAdmin())return;const f=$('restoreFile').files[0];if(!f)return alert('Choose file');if(!confirm('Replace all data?'))return;try{const x=JSON.parse(await f.text());if(!x||!Array.isArray(x.products))throw new Error('Invalid backup');const keep={pinSalt:state.settings.pinSalt,pinHash:state.settings.pinHash};state=normalize({products:x.products,sales:x.sales,debts:x.debts,payments:Array.isArray(x.payments)?x.payments:[],expenses:Array.isArray(x.expenses)?x.expenses:[],settings:{...(x.settings||{}),...keep}});cart=[];if(save()){renderAll();alert('Restored.');}}catch(e){alert('Restore failed: '+e.message)}}
 async function clearAllData(){if(!await requireAdmin())return;if(!confirm('Clear all?'))return;state=normalize({products:[],sales:[],debts:[],payments:[],expenses:[],settings:state.settings});cart=[];save();renderAll();showPage('sell')}
-function printReport(){const r=reportData();showReceipt(`${state.settings.shopName} — REPORT\nDate: ${dateText(new Date())}\nSales: ${money(r.total)}\nProfit: ${money(r.profit)}\nExpenses: ${money(r.expenses)}\nNET: ${money(r.net)}`)}
-function printDebts(){const ds=state.debts.filter(d=>d.remaining>0);showReceipt(state.settings.shopName+' — DEBT BOOK\nDate: '+dateText(new Date())+'\n\n'+(ds.map(d=>`${d.customer}: ${money(d.remaining)}`).join('\n')||'No debts')+'\n\nTotal: '+money(ds.reduce((a,d)=>a+d.remaining,0)))}
-function printSales(){const from=$('salesFrom').value,to=$('salesTo').value;const ss=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).reverse();showReceipt(state.settings.shopName+' — SALES\n'+ss.map(s=>`${dateText(s.date)} | ${s.customer} | ${money(s.total)}`).join('\n')+'\n\nTotal: '+money(ss.filter(s=>!s.voided).reduce((a,s)=>a+s.total,0)))}
+function printReport(){const r=reportData();showReceipt(`${state.settings.shopName} — REPORT\nBranch: ${window.getBranchFilter()}\nDate: ${dateText(new Date())}\nSales: ${money(r.total)}\nProfit: ${money(r.profit)}\nExpenses: ${money(r.expenses)}\nNET: ${money(r.net)}`)}
+function printDebts(){const ds=state.debts.filter(d=>d.remaining>0).filter(d=>window.passesBranchForCashier(d)).filter(d=>window.passesBranch(d));showReceipt(state.settings.shopName+' — DEBT BOOK\nBranch: '+window.getBranchFilter()+'\nDate: '+dateText(new Date())+'\n\n'+(ds.map(d=>`${d.customer}: ${money(d.remaining)}`).join('\n')||'No debts')+'\n\nTotal: '+money(ds.reduce((a,d)=>a+d.remaining,0)))}
+function printSales(){const from=$('salesFrom').value,to=$('salesTo').value;const ss=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s)).reverse();showReceipt(state.settings.shopName+' — SALES\nBranch: '+window.getBranchFilter()+'\n'+ss.map(s=>`${dateText(s.date)} | ${s.customer} | ${money(s.total)}`).join('\n')+'\n\nTotal: '+money(ss.filter(s=>!s.voided).reduce((a,s)=>a+s.total,0)))}
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('controllerchange', ()=>{ location.reload(); });
 }

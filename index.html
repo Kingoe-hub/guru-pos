@@ -19,7 +19,6 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
   const SUPABASE_KEY = 'sb_publishable__osC2SU7QjPAu_Z5jwWqDA_TdlX-AF8';
   let supabaseClient=null;
   try{ supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
-  
   function getPending(){ try{ return JSON.parse(localStorage.getItem('guru_pending_sync')||'[]'); }catch(e){ return []; } }
   function setPending(arr){ localStorage.setItem('guru_pending_sync', JSON.stringify(arr)); updatePendingUI(); }
   function addToPending(type,payload){ const a=getPending(); a.push({type, payload, at: new Date().toISOString()}); setPending(a); }
@@ -210,24 +209,17 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
   </aside>
   <main class="main">
     <div class="heading"><h1 id="pageTitle">Sell</h1><input id="search" class="search" placeholder="Search products…" oninput="renderProducts()"></div>
-
-      // GURU BRANCH PATCH FIX - Cashier NEVER sees switcher
-  const sw=document.getElementById('branchSwitcher');
-  const bf=document.getElementById('branchFilter');
-  const myRole = localStorage.getItem('guru_role');
-  const myBranch = window.getMyBranch();
-  // Force cashier filter to his own branch - ignore any saved ALL
-  if(myRole==='cashier'){
-    localStorage.setItem('guru_branch_filter', myBranch);
-    if(sw) sw.style.display='none';
-  } else {
-    // Owner only
-    if(sw){
-      if(myBranch==='ALL'){ sw.style.display='block'; if(bf) bf.value=window.getBranchFilter(); const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = window.getBranchFilter()==='ALL' ? 'Showing ALL branches' : 'Showing '+window.getBranchFilter()+' only'; }
-      else { sw.style.display='none'; }
-    }
-  }
-    <!-- GURU BRANCH PATCH END -->
+    <div id="branchSwitcher" style="display:none;margin-bottom:12px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px">
+      <label class="small" style="font-weight:700;color:#0a2240">Viewing Branch: </label>
+      <select id="branchFilter" class="field" style="width:auto;display:inline-block;margin:0" onchange="window.setBranchFilter(this.value)">
+        <option value="ALL">All Branches (Owner)</option>
+        <option value="BRANCH-1">Branch 1 - Main Market</option>
+        <option value="BRANCH-2">Branch 2 - Hospital</option>
+        <option value="BRANCH-3">Branch 3 - School</option>
+        <option value="BRANCH-4">Branch 4 - Station</option>
+      </select>
+      <span id="branchLabel" class="small" style="margin-left:8px"></span>
+    </div>
     <div id="notice" class="notice"></div>
     <section id="page-sell"><div id="productGrid" class="cards"></div></section>
     <section id="page-stock" class="hidden">
@@ -236,7 +228,6 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
     </section>
     <section id="page-sales" class="hidden"><div class="panel section"><div class="row"><h3>Sales history</h3><button class="btn light" onclick="printSales()">Print list</button></div><div class="formgrid"><input id="salesFrom" class="field" type="date" onchange="salesLimit=50;renderSales()"><input id="salesTo" class="field" type="date" onchange="salesLimit=50;renderSales()"></div><div id="salesList"></div></div></section>
     <section id="page-reports" class="hidden"><div class="panel section"><div class="row"><h3>Business report</h3><button class="btn orange" onclick="printReport()">Print report</button></div>
-<!-- GURU PATCH: CALENDAR RANGE START - ONLY CHANGE -->
 <div style="margin-bottom:12px">
   <select id="reportRange" class="field" onchange="renderReports()">
     <option value="today">Today</option>
@@ -257,7 +248,6 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
     </div>
   </div>
 </div>
-<!-- GURU PATCH: CALENDAR RANGE END -->
 <div class="metrics"><div class="metric"><label>Sales value</label><strong id="rSales">K 0.00</strong><div id="rCount" class="small">0 transactions</div></div><div class="metric"><label>Estimated profit</label><strong id="rProfit" class="good">K 0.00</strong><div id="rMargin" class="small">0% margin</div></div><div class="metric"><label>Expenses</label><strong id="rExp" class="bad">K 0.00</strong></div><div class="metric"><label>Net profit (after expenses)</label><strong id="rNet" class="good">K 0.00</strong></div><div class="metric"><label>Credit issued</label><strong id="rCredit" class="bad">K 0.00</strong></div><div class="metric"><label>Debt payments received</label><strong id="rDebtIn" class="good">K 0.00</strong></div></div></div>
       <div class="panel section"><h3>Money in & out</h3><div id="receivedList"></div></div>
       <div class="panel section"><h3>Best sellers</h3><div id="bestList"></div></div><div class="panel"><h3>Low stock (3 or fewer)</h3><div id="lowList"></div></div></section>
@@ -274,18 +264,15 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
 </div>
 <nav class="bottomnav"><button data-page="sell" class="active" onclick="showPage('sell')"><b>🛒</b>Sell</button><button data-page="stock" onclick="showPage('stock')"><b>📦</b>Stock</button><button data-page="reports" onclick="showPage('reports')"><b>📊</b>Reports</button><button data-page="sales" onclick="showPage('sales')"><b>📈</b>Sales</button><button data-page="debts" onclick="showPage('debts')"><b>📒</b>Debts</button><button data-page="expenses" onclick="showPage('expenses')"><b>💸</b>Expenses</button><button data-page="backup" onclick="showPage('backup')"><b>⚙️</b>Settings</button></nav>
 <div id="cartOverlay" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:20" onclick="if(event.target===this)closeCart()"><div style="background:#fff;position:absolute;right:0;top:0;bottom:0;width:min(92%,420px);padding:16px;display:flex;flex-direction:column;overflow:auto"><div class="row"><h2>Cart</h2><button class="btn light" onclick="closeCart()">Close ✕</button></div><div id="mobileCartItems" class="cartitems"></div><div class="cartfooter"><div class="row"><strong>Total</strong><strong id="mobileCartTotal">K 0.00</strong></div><input id="mobileCustomerName" class="field" placeholder="Customer name"><input id="mobileCustomerPhone" class="field" placeholder="Phone / WhatsApp"><select id="mobilePayMethod" class="field" onchange="syncPay(this.value)"><option value="cash">Paid by: Cash</option><option value="momo">Paid by: Mobile money</option><option value="bank">Paid by: Bank</option></select><button class="btn primary full" onclick="checkout('sale')">Complete sale</button><button class="btn green full" style="margin-top:7px" onclick="checkout('whatsapp')">Sale + WhatsApp receipt</button><button class="btn red full" style="margin-top:7px" onclick="checkout('credit')">Record credit / debt</button><button class="btn light full" style="margin-top:7px" onclick="clearCart()">Clear cart</button></div></div></div>
-
 <script>
 window.BOSS_ROLE = localStorage.getItem('guru_role') || 'owner';
 window.getDBKey = function(){ const shop = localStorage.getItem('guru_shopId'); return shop ? 'guru_pos_v3_data_' + shop : 'guru_pos_v3_data'; }
-// GURU BRANCH PATCH START - Helpers
 window.getMyBranch = function(){ return localStorage.getItem('guru_branch') || 'ALL'; }
 window.getBranchFilter = function(){ const f = localStorage.getItem('guru_branch_filter'); if(f) return f; return window.getMyBranch(); }
 window.setBranchFilter = function(v){ if(localStorage.getItem('guru_role')==='cashier'){ return; } localStorage.setItem('guru_branch_filter', v); renderAll(); const el=document.getElementById('branchFilter'); if(el) el.value=v; const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = v==='ALL' ? 'Showing ALL branches' : 'Showing '+v+' only'; }
 window.branchOf = function(item){ return item.branch || 'BRANCH-1'; }
 window.passesBranch = function(item){ const f = window.getBranchFilter(); if(f==='ALL') return true; return window.branchOf(item)===f; }
 window.passesBranchForCashier = function(item){ const my = window.getMyBranch(); if(my==='ALL') return true; return window.branchOf(item)===my; }
-// GURU BRANCH PATCH END
 window.setBossRole = function(r){
   window.BOSS_ROLE = r;
   const o=document.getElementById('ownerBtn'), c=document.getElementById('cashierBtn');
@@ -311,12 +298,10 @@ window.doBossLoginNow = function(){
   localStorage.setItem('guru_shopId', shop);
   localStorage.setItem('guru_pin', pin);
   localStorage.setItem('guru_current_shop', shop);
-  // GURU BRANCH PATCH START - Save branch
   const branchEl=document.getElementById('branchInput');
   const branch = branchEl ? branchEl.value : 'ALL';
   localStorage.setItem('guru_branch', branch);
   localStorage.setItem('guru_branch_filter', branch);
-  // GURU BRANCH PATCH END
   document.getElementById('bossLogin').style.display='none';
   location.reload();
 }
@@ -324,10 +309,8 @@ window.bossLogoutNow = function(){
   if(confirm('Switch shop / logout?')){
     localStorage.removeItem('guru_role');
     localStorage.removeItem('guru_shopId');
-    // GURU BRANCH PATCH START
     localStorage.removeItem('guru_branch');
     localStorage.removeItem('guru_branch_filter');
-    // GURU BRANCH PATCH END
     location.reload();
   }
 }
@@ -350,8 +333,7 @@ function initBossUI(){
   }
   const pinInput=document.getElementById('bossPin');
   if(pinInput){ pinInput.addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,4); }); }
-  // GURU BRANCH PATCH START - Show switcher only for Owner/ALL
-   const sw=document.getElementById('branchSwitcher');
+  const sw=document.getElementById('branchSwitcher');
   const bf=document.getElementById('branchFilter');
   const myRole = localStorage.getItem('guru_role');
   const myBranch = window.getMyBranch();
@@ -364,11 +346,9 @@ function initBossUI(){
       else { sw.style.display='none'; }
     }
   }
-  // GURU BRANCH PATCH END
 }
 initBossUI();
 </script>
-
 <script>
 'use strict';
 const METHODS={cash:'Cash',momo:'Mobile money',bank:'Bank',credit:'Credit'};

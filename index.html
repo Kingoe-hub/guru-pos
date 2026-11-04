@@ -210,18 +210,23 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
   </aside>
   <main class="main">
     <div class="heading"><h1 id="pageTitle">Sell</h1><input id="search" class="search" placeholder="Search products…" oninput="renderProducts()"></div>
-    <!-- GURU BRANCH PATCH START - Branch Switcher for Owner -->
-    <div id="branchSwitcher" style="display:none;margin-bottom:12px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px">
-      <label class="small" style="font-weight:700;color:#0a2240">Viewing Branch: </label>
-      <select id="branchFilter" class="field" style="width:auto;display:inline-block;margin:0" onchange="window.setBranchFilter(this.value)">
-        <option value="ALL">All Branches (Owner)</option>
-        <option value="BRANCH-1">Branch 1 - Main Market</option>
-        <option value="BRANCH-2">Branch 2 - Hospital</option>
-        <option value="BRANCH-3">Branch 3 - School</option>
-        <option value="BRANCH-4">Branch 4 - Station</option>
-      </select>
-      <span id="branchLabel" class="small" style="margin-left:8px"></span>
-    </div>
+
+      // GURU BRANCH PATCH FIX - Cashier NEVER sees switcher
+  const sw=document.getElementById('branchSwitcher');
+  const bf=document.getElementById('branchFilter');
+  const myRole = localStorage.getItem('guru_role');
+  const myBranch = window.getMyBranch();
+  // Force cashier filter to his own branch - ignore any saved ALL
+  if(myRole==='cashier'){
+    localStorage.setItem('guru_branch_filter', myBranch);
+    if(sw) sw.style.display='none';
+  } else {
+    // Owner only
+    if(sw){
+      if(myBranch==='ALL'){ sw.style.display='block'; if(bf) bf.value=window.getBranchFilter(); const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = window.getBranchFilter()==='ALL' ? 'Showing ALL branches' : 'Showing '+window.getBranchFilter()+' only'; }
+      else { sw.style.display='none'; }
+    }
+  }
     <!-- GURU BRANCH PATCH END -->
     <div id="notice" class="notice"></div>
     <section id="page-sell"><div id="productGrid" class="cards"></div></section>
@@ -276,7 +281,7 @@ window.getDBKey = function(){ const shop = localStorage.getItem('guru_shopId'); 
 // GURU BRANCH PATCH START - Helpers
 window.getMyBranch = function(){ return localStorage.getItem('guru_branch') || 'ALL'; }
 window.getBranchFilter = function(){ const f = localStorage.getItem('guru_branch_filter'); if(f) return f; return window.getMyBranch(); }
-window.setBranchFilter = function(v){ localStorage.setItem('guru_branch_filter', v); renderAll(); const el=document.getElementById('branchFilter'); if(el) el.value=v; const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = v==='ALL' ? 'Showing ALL branches' : 'Showing '+v+' only'; }
+window.setBranchFilter = function(v){ if(localStorage.getItem('guru_role')==='cashier'){ return; } localStorage.setItem('guru_branch_filter', v); renderAll(); const el=document.getElementById('branchFilter'); if(el) el.value=v; const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = v==='ALL' ? 'Showing ALL branches' : 'Showing '+v+' only'; }
 window.branchOf = function(item){ return item.branch || 'BRANCH-1'; }
 window.passesBranch = function(item){ const f = window.getBranchFilter(); if(f==='ALL') return true; return window.branchOf(item)===f; }
 window.passesBranchForCashier = function(item){ const my = window.getMyBranch(); if(my==='ALL') return true; return window.branchOf(item)===my; }
@@ -346,11 +351,18 @@ function initBossUI(){
   const pinInput=document.getElementById('bossPin');
   if(pinInput){ pinInput.addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,4); }); }
   // GURU BRANCH PATCH START - Show switcher only for Owner/ALL
-  const sw=document.getElementById('branchSwitcher');
+   const sw=document.getElementById('branchSwitcher');
   const bf=document.getElementById('branchFilter');
-  if(sw){
-    if(window.getMyBranch()==='ALL'){ sw.style.display='block'; if(bf) bf.value=window.getBranchFilter(); const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = window.getBranchFilter()==='ALL' ? 'Showing ALL branches' : 'Showing '+window.getBranchFilter()+' only'; }
-    else { sw.style.display='none'; }
+  const myRole = localStorage.getItem('guru_role');
+  const myBranch = window.getMyBranch();
+  if(myRole==='cashier'){
+    localStorage.setItem('guru_branch_filter', myBranch);
+    if(sw) sw.style.display='none';
+  } else {
+    if(sw){
+      if(myBranch==='ALL'){ sw.style.display='block'; if(bf) bf.value=window.getBranchFilter(); const lab=document.getElementById('branchLabel'); if(lab) lab.textContent = window.getBranchFilter()==='ALL' ? 'Showing ALL branches' : 'Showing '+window.getBranchFilter()+' only'; }
+      else { sw.style.display='none'; }
+    }
   }
   // GURU BRANCH PATCH END
 }

@@ -180,7 +180,6 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
     </div>
     <label class="small">Shop ID</label>
     <input id="shopIdInput" class="boss-input" placeholder="SHOP-GURU-123">
-    <!-- GURU BRANCH PATCH START -->
     <label class="small">Branch / Outlet</label>
     <select id="branchInput" class="boss-input">
       <option value="ALL">👔 OWNER - See All Branches</option>
@@ -189,7 +188,6 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
       <option value="BRANCH-3">Branch 3 - School</option>
       <option value="BRANCH-4">Branch 4 - Station</option>
     </select>
-    <!-- GURU BRANCH PATCH END -->
     <div style="display:flex;gap:8px">
       <button class="btn light" style="flex:1;background:#374151;color:#fff" onclick="window.genShopIdNow()">🔄 Generate ID</button>
       <button class="qr-btn" style="flex:1" onclick="alert('Boss Pro: QR Scan coming soon')">📷 Scan QR</button>
@@ -205,8 +203,7 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
 <div class="layout">
   <aside class="sidebar"><div class="brand" style="margin:5px 8px 16px">GURU <span>POS</span></div>
     <button class="navbtn active" data-page="sell" onclick="showPage('sell')">🛒 Sell</button><button class="navbtn" data-page="stock" onclick="showPage('stock')">📦 Stock</button><button class="navbtn" data-page="sales" onclick="showPage('sales')">📈 Sales</button><button class="navbtn" data-page="reports" onclick="showPage('reports')">📊 Reports</button><button class="navbtn" data-page="expenses" onclick="showPage('expenses')">💸 Expenses</button><button class="navbtn" data-page="debts" onclick="showPage('debts')">📒 Debt book</button><button class="navbtn" data-page="backup" onclick="showPage('backup')">💾 Backup & settings</button>
-    <div class="totals"><div class="small">Today's sales</div><strong id="sideToday">K 0.00</strong><div class="small" style="margin-top:8px">Outstanding debt</div><strong id="sideDebt" class="bad">K 0.00</strong><button class="btn light full" style="margin-top:12px" onclick="adminLogin()">🔒 Admin login</button><div id="adminLabel" class="sub" style="margin-top:6px">Customer mode</div><div id="syncInfo" class="sub" style="margin-top:8px">Sync: init...</div><button id="forceSyncBtn" class="btn orange full" style="display:none;margin-top:8px" onclick="flushPending()">🔄 Sync Offline Sales Now</button></div>
-    <button class="btn light full" style="margin-top:8px;background:#dc2626;color:#fff" onclick="window.bossLogoutNow()">🚪 Logout / Switch Branch</button>
+    <div class="totals"><div class="small">Today's sales</div><strong id="sideToday">K 0.00</strong><div class="small" style="margin-top:8px">Outstanding debt</div><strong id="sideDebt" class="bad">K 0.00</strong><button class="btn light full" style="margin-top:12px" onclick="adminLogin()">🔒 Admin login</button><button class="btn light full" style="margin-top:8px;background:#dc2626;color:#fff" onclick="window.bossLogoutNow()">🚪 Logout / Switch Branch</button><div id="adminLabel" class="sub" style="margin-top:6px">Customer mode</div><div id="syncInfo" class="sub" style="margin-top:8px">Sync: init...</div><button id="forceSyncBtn" class="btn orange full" style="display:none;margin-top:8px" onclick="flushPending()">🔄 Sync Offline Sales Now</button></div>
   </aside>
   <main class="main">
     <div class="heading"><h1 id="pageTitle">Sell</h1><input id="search" class="search" placeholder="Search products…" oninput="renderProducts()"></div>
@@ -228,30 +225,51 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
       <div class="panel"><div class="row"><h3>Inventory</h3><span id="stockCount" class="pill">0 products</span></div><div id="stockList"></div></div>
     </section>
     <section id="page-sales" class="hidden"><div class="panel section"><div class="row"><h3>Sales history</h3><button class="btn light" onclick="printSales()">Print list</button></div><div class="formgrid"><input id="salesFrom" class="field" type="date" onchange="salesLimit=50;renderSales()"><input id="salesTo" class="field" type="date" onchange="salesLimit=50;renderSales()"></div><div id="salesList"></div></div></section>
-    <section id="page-reports" class="hidden"><div class="panel section"><div class="row"><h3>Business report</h3><button class="btn orange" onclick="printReport()">Print report</button></div>
-<div style="margin-bottom:12px">
-  <select id="reportRange" class="field" onchange="renderReports()">
-    <option value="today">Today</option>
-    <option value="week">Last 7 days</option>
-    <option value="month">This month</option>
-    <option value="all">All time</option>
-    <option value="custom">📅 Custom period - pick dates below</option>
-  </select>
-  <div id="repCustom" class="formgrid" style="background:#f8fafc;padding:10px;border-radius:10px;border:1px dashed #cbd5e1">
-    <label class="small" style="grid-column:1/-1;margin:0 0 2px;color:#0a2240;font-weight:700">📅 Choose ANY period you want:</label>
-    <div>
-      <label class="small">From date</label>
-      <input id="repFrom" class="field" type="date" onchange="document.getElementById('reportRange').value='custom'; renderReports()">
-    </div>
-    <div>
-      <label class="small">To date</label>
-      <input id="repTo" class="field" type="date" onchange="document.getElementById('reportRange').value='custom'; renderReports()">
-    </div>
-  </div>
-</div>
-<div class="metrics"><div class="metric"><label>Sales value</label><strong id="rSales">K 0.00</strong><div id="rCount" class="small">0 transactions</div></div><div class="metric"><label>Estimated profit</label><strong id="rProfit" class="good">K 0.00</strong><div id="rMargin" class="small">0% margin</div></div><div class="metric"><label>Expenses</label><strong id="rExp" class="bad">K 0.00</strong></div><div class="metric"><label>Net profit (after expenses)</label><strong id="rNet" class="good">K 0.00</strong></div><div class="metric"><label>Credit issued</label><strong id="rCredit" class="bad">K 0.00</strong></div><div class="metric"><label>Debt payments received</label><strong id="rDebtIn" class="good">K 0.00</strong></div></div></div>
-      <div class="panel section"><h3>Money in & out</h3><div id="receivedList"></div></div>
-      <div class="panel section"><h3>Best sellers</h3><div id="bestList"></div></div><div class="panel"><h3>Low stock (3 or fewer)</h3><div id="lowList"></div></div></section>
+    <section id="page-reports" class="hidden">
+      <div class="panel section"><div class="row"><h3>Business report — Real Profit</h3><button class="btn orange" onclick="printReport()">Print report</button></div>
+      <div style="margin-bottom:12px">
+        <select id="reportRange" class="field" onchange="renderReports()">
+          <option value="today">Today</option>
+          <option value="week">Last 7 days</option>
+          <option value="month">This month</option>
+          <option value="all">All time</option>
+          <option value="custom">📅 Custom period - pick dates below</option>
+        </select>
+        <div id="repCustom" class="formgrid" style="background:#f8fafc;padding:10px;border-radius:10px;border:1px dashed #cbd5e1">
+          <label class="small" style="grid-column:1/-1;margin:0 0 2px;color:#0a2240;font-weight:700">📅 Choose ANY period you want:</label>
+          <div><label class="small">From date</label><input id="repFrom" class="field" type="date" onchange="document.getElementById('reportRange').value='custom'; renderReports()"></div>
+          <div><label class="small">To date</label><input id="repTo" class="field" type="date" onchange="document.getElementById('reportRange').value='custom'; renderReports()"></div>
+        </div>
+        <div class="formgrid" style="background:#fff7ed;padding:10px;border-radius:10px;border:1px solid #fed7aa;margin-top:10px">
+          <div><label class="small" style="font-weight:700;color:#9a3412">💰 OPENING CASH BALANCE — Cash in till at start of day</label><input id="openingCash" class="field" type="number" min="0" step="0.01" placeholder="e.g. 500" onchange="localStorage.setItem('guru_opening_cash',this.value);renderReports()"></div>
+          <div><label class="small" style="font-weight:700;color:#9a3412">🏦 OPENING BANK / MOMO BALANCE</label><input id="openingBank" class="field" type="number" min="0" step="0.01" placeholder="e.g. 1000" onchange="localStorage.setItem('guru_opening_bank',this.value);renderReports()"></div>
+        </div>
+        <div class="formgrid" style="background:#eff6ff;padding:10px;border-radius:10px;border:1px solid #bfdbfe;margin-top:10px">
+          <div><label class="small" style="font-weight:700;color:#1e40af">🧾 ACTUAL CASH COUNTED — Count real cash in till now</label><input id="actualCash" class="field" type="number" min="0" step="0.01" placeholder="e.g. 2200 - count till" onchange="localStorage.setItem('guru_actual_cash',this.value);renderReports()"></div>
+          <div><label class="small" style="font-weight:700;color:#1e40af">📊 SHORT / OVER RESULT</label><div id="shortOverBox" style="padding:11px;border-radius:10px;background:#fff;border:1px solid #bfdbfe;font-weight:900;text-align:center">Enter counted cash</div></div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><label>Opening Cash</label><strong id="rOpen">K 0.00</strong><div class="small">Start of period</div></div>
+        <div class="metric"><label>Sales Value (Gross)</label><strong id="rSales">K 0.00</strong><div id="rCount" class="small">0 transactions</div></div>
+        <div class="metric"><label>Refunds / Returns / Voided</label><strong id="rRefund" class="bad">K 0.00</strong><div id="rRefundCount" class="small">0 voided</div></div>
+        <div class="metric"><label>Net Sales (After Refunds)</label><strong id="rNetSales">K 0.00</strong></div>
+        <div class="metric"><label>Cost of Goods Sold (COGS)</label><strong id="rCogs" class="bad">K 0.00</strong><div class="small">What stock cost you</div></div>
+        <div class="metric"><label>Gross Profit</label><strong id="rGross" class="good">K 0.00</strong><div id="rMargin" class="small">0% margin</div></div>
+        <div class="metric"><label>Operating Expenses</label><strong id="rExp" class="bad">K 0.00</strong></div>
+        <div class="metric"><label>Credit Issued</label><strong id="rCredit" class="bad">K 0.00</strong><div class="small">Not yet cash</div></div>
+        <div class="metric"><label>Debt Payments Received</label><strong id="rDebtIn" class="good">K 0.00</strong></div>
+      </div>
+      <div class="panel section" style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0">
+        <h3>💰 CASH FLOW — Cash In / Cash Out</h3>
+        <div id="cashFlowList"></div>
+        <div class="listrow" style="background:#dcfce7"><strong>NET PROFIT (Real Money Made)</strong><strong id="rNet" class="good">K 0.00</strong></div>
+        <div class="small" style="padding:8px">Formula: Gross Profit - Operating Expenses = Net Profit. Refunds already removed from Net Sales.</div>
+      </div>
+      <div class="panel section"><h3>🏦 RECONCILIATION — Cash, Bank & MoMo Must Balance</h3><div id="receivedList"></div><div id="reconcileList"></div></div>
+      <div class="panel section"><h3>Best sellers</h3><div id="bestList"></div></div>
+      <div class="panel"><h3>Low stock (3 or fewer)</h3><div id="lowList"></div></div>
+      </section>
     <section id="page-expenses" class="hidden"><div class="panel section"><h3>Add expense</h3><form id="expenseForm" class="formgrid"><select class="field" id="eCat"></select><input class="field" id="eAmount" type="number" min="0.01" step="0.01" placeholder="Amount (K)" required><select class="field" id="eMethod"><option value="cash">Paid by: Cash</option><option value="momo">Paid by: Mobile money</option><option value="bank">Paid by: Bank</option></select><input class="field" id="eDate" type="date"><input class="field wide" id="eNote" placeholder="Note" maxlength="80"><button class="btn primary" type="submit">Add expense</button></form></div>
       <div class="panel"><div class="row"><h3>Expenses</h3><select id="expRange" class="field" style="width:auto;margin:0" onchange="renderExpenses()"><option value="month">This month</option><option value="today">Today</option><option value="week">Last 7 days</option><option value="all">All time</option></select></div><div id="expSummary" class="small" style="margin:8px 0"></div><div id="expList"></div></div></section>
     <section id="page-debts" class="hidden"><div class="panel"><div class="row"><h3>Debt book</h3><button class="btn light" onclick="printDebts()">Print list</button></div><input id="debtSearch" class="field" placeholder="Search customer or phone" oninput="renderDebts()"><div id="debtSummary" class="small"></div><div id="debtList"></div></div></section>
@@ -281,12 +299,8 @@ window.setBossRole = function(r){
   const br=document.getElementById('branchInput');
   if(br){
     const allOpt=br.querySelector('option[value="ALL"]');
-    if(r==='cashier'){
-      if(allOpt) allOpt.style.display='none';
-      if(br.value==='ALL') br.value='BRANCH-1';
-    } else {
-      if(allOpt) allOpt.style.display='';
-    }
+    if(r==='cashier'){ if(allOpt) allOpt.style.display='none'; if(br.value==='ALL') br.value='BRANCH-1'; }
+    else { if(allOpt) allOpt.style.display=''; }
   }
 }
 window.genShopIdNow = function(){
@@ -311,7 +325,7 @@ window.doBossLoginNow = function(){
   localStorage.setItem('guru_current_shop', shop);
   const branchEl=document.getElementById('branchInput');
   const branch = branchEl ? branchEl.value : 'ALL';
-    if(window.BOSS_ROLE==='cashier' && branch==='ALL'){ alert('Cashier cannot use ALL. Choose Branch 1, 2, 3 or 4.'); return; }
+  if(window.BOSS_ROLE==='cashier' && branch==='ALL'){ alert('Cashier cannot use ALL. Choose Branch 1, 2, 3 or 4.'); return; }
   localStorage.setItem('guru_branch', branch);
   localStorage.setItem('guru_branch_filter', branch);
   document.getElementById('bossLogin').style.display='none';
@@ -494,12 +508,80 @@ async function deleteProduct(id){
   }
 }
 function withinRange(date,range){const d=new Date(date),now=new Date();if(range==='today')return d.toDateString()===now.toDateString();if(range==='week'){const from=new Date();from.setDate(from.getDate()-6);from.setHours(0,0,0,0);return d>=from&&d<=now}if(range==='month')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();if(range==='custom'){const from=$('repFrom').value,to=$('repTo').value;return (!from||d>=new Date(from+'T00:00:00'))&&(!to||d<=new Date(to+'T23:59:59'))}return true}
-function reportData(){const range=$('reportRange').value;const inRange=state.sales.filter(s=>withinRange(s.date,range)).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s));const ss=inRange.filter(s=>!s.voided);let total=0,profit=0,credit=0,debtIn=0,refunds=0;const best={},rec={cash:0,momo:0,bank:0};ss.forEach(s=>{total+=s.total;profit+=s.profit||0;if(s.method==='credit')credit+=s.total;(s.cart||[]).forEach(c=>best[c.name]=(best[c.name]||0)+c.qty)});inRange.forEach(s=>{if(s.method!=='credit')rec[payKey(s.method)]+=s.total});state.payments.filter(p=>withinRange(p.date,range)).filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p)).forEach(p=>{rec[payKey(p.method)]+=p.amount;if(p.refund)refunds+=-p.amount;else debtIn+=p.amount});const es=state.expenses.filter(e=>withinRange(e.date,range)).filter(e=>window.passesBranchForCashier(e)).filter(e=>window.passesBranch(e)),out={cash:0,momo:0,bank:0};let expenses=0;es.forEach(e=>{out[payKey(e.method)]+=e.amount;expenses+=e.amount});return {range,ss,total:round2(total),profit:round2(profit),credit:round2(credit),debtIn:round2(debtIn),refunds:round2(refunds),expenses:round2(expenses),net:round2(profit-expenses),rec,out,best}}
+function reportData(){
+  const range=$('reportRange').value;
+  const inRange=state.sales.filter(s=>withinRange(s.date,range)).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s));
+  const ss=inRange.filter(s=>!s.voided);
+  const voided=inRange.filter(s=>s.voided);
+  let total=0,cogs=0,credit=0,debtIn=0,refunds=0;
+  const best={},rec={cash:0,momo:0,bank:0};
+  ss.forEach(s=>{ total+=s.total; if(s.method==='credit') credit+=s.total; (s.cart||[]).forEach(c=>{ best[c.name]=(best[c.name]||0)+c.qty; cogs+=(c.cost||0)*c.qty; }) });
+  voided.forEach(s=>{ refunds+=s.total; });
+  inRange.forEach(s=>{ if(s.method!=='credit' && !s.voided) rec[payKey(s.method)]+=s.total; });
+  let refundCash=0,refundMomo=0,refundBank=0;
+  voided.forEach(s=>{ if(s.method==='credit'){} else if(payKey(s.method)==='cash') refundCash+=s.total; else if(payKey(s.method)==='momo') refundMomo+=s.total; else refundBank+=s.total; });
+  state.payments.filter(p=>withinRange(p.date,range)).filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p)).forEach(p=>{ if(p.refund){ refunds+=p.amount; if(payKey(p.method)==='cash') refundCash+=p.amount; else if(payKey(p.method)==='momo') refundMomo+=p.amount; else refundBank+=p.amount; } else { rec[payKey(p.method)]+=p.amount; debtIn+=p.amount; } });
+  const es=state.expenses.filter(e=>withinRange(e.date,range)).filter(e=>window.passesBranchForCashier(e)).filter(e=>window.passesBranch(e));
+  const out={cash:0,momo:0,bank:0}; let expenses=0;
+  es.forEach(e=>{ out[payKey(e.method)]+=e.amount; expenses+=e.amount; });
+  const netSales=round2(total);
+  const gross=round2(netSales - cogs);
+  const net=round2(gross - expenses);
+  const openingCash=Number(localStorage.getItem('guru_opening_cash')||0);
+  const openingBank=Number(localStorage.getItem('guru_opening_bank')||0);
+  const actualCashRaw=localStorage.getItem('guru_actual_cash');
+  const actualCash=actualCashRaw===''||actualCashRaw===null?null:Number(actualCashRaw);
+  const cashReceived=round2(rec.cash - refundCash);
+  const cashWithdrawn=round2(out.cash);
+  const cashExpected=round2(openingCash + cashReceived - cashWithdrawn);
+  const momoExpected=round2(openingBank + (rec.momo - refundMomo) - out.momo);
+  const bankExpected=round2(rec.bank - refundBank - out.bank);
+  const shortOver=actualCash===null?null:round2(actualCash - cashExpected);
+  return {range,ss,voided,total:round2(total),netSales,cogs:round2(cogs),gross,credit:round2(credit),debtIn:round2(debtIn),refunds:round2(refunds),expenses:round2(expenses),net,rec,out,best,openingCash,openingBank,actualCash,cashReceived,cashWithdrawn,cashExpected,momoExpected,bankExpected,refundCash,refundMomo,refundBank,shortOver};
+}
 function renderReports(){
   const r=reportData();
-  const customBox = document.getElementById('repCustom');
-  if(customBox){ customBox.style.display='grid'; }
-  $('rSales').textContent=money(r.total);$('rCount').textContent=r.ss.length+' transactions';$('rProfit').textContent=money(r.profit);$('rMargin').textContent=(r.total?Math.round(r.profit/r.total*100):0)+'% margin';$('rCredit').textContent=money(r.credit);$('rDebtIn').textContent=money(r.debtIn);$('rExp').textContent=money(r.expenses);$('rNet').textContent=money(r.net);const totalIn=r.rec.cash+r.rec.momo+r.rec.bank,totalNet=totalIn-r.expenses;$('receivedList').innerHTML=['cash','momo','bank'].map(k=>`<div class="listrow"><div><span>${METHODS[k]}</span><div class="small">in ${money(r.rec[k])} · exp ${money(r.out[k])}</div></div><strong>${money(r.rec[k]-r.out[k])}</strong></div>`).join('')+`<div class="listrow"><strong>Net in hand</strong><strong>${money(totalNet)}</strong></div>`;const top=Object.entries(r.best).sort((a,b)=>b[1]-a[1]).slice(0,5);$('bestList').innerHTML=top.map(([n,q],i)=>`<div class="listrow"><span>${i+1}. ${esc(n)}</span><strong>${q} sold</strong></div>`).join('')||'<div class="empty">No sales</div>';const low=state.products.filter(p=>p.stock<=3).filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p));$('lowList').innerHTML=low.map(p=>`<div class="listrow"><span>${esc(p.name)}</span><span>${p.stock} left <button class="btn orange" onclick="restock('${p.id}')">Restock</button></span></div>`).join('')||'<div class="empty good">All stocked</div>';}
+  const oc=$('openingCash'), ob=$('openingBank'), ac=$('actualCash');
+  if(oc && !oc.value) oc.value=localStorage.getItem('guru_opening_cash')||'';
+  if(ob && !ob.value) ob.value=localStorage.getItem('guru_opening_bank')||'';
+  if(ac && !ac.value) ac.value=localStorage.getItem('guru_actual_cash')||'';
+  const customBox=document.getElementById('repCustom');
+  if(customBox) customBox.style.display='grid';
+  if($('rOpen')) $('rOpen').textContent=money(r.openingCash);
+  $('rSales').textContent=money(r.total); $('rCount').textContent=r.ss.length+' transactions';
+  if($('rRefund')) $('rRefund').textContent='-'+money(r.refunds);
+  if($('rRefundCount')) $('rRefundCount').textContent=r.voided.length+' voided / returned';
+  if($('rNetSales')) $('rNetSales').textContent=money(r.netSales);
+  if($('rCogs')) $('rCogs').textContent=money(r.cogs);
+  if($('rGross')) $('rGross').textContent=money(r.gross);
+  $('rMargin').textContent=(r.netSales?Math.round(r.gross/r.netSales*100):0)+'% margin on net sales';
+  $('rCredit').textContent=money(r.credit); $('rDebtIn').textContent=money(r.debtIn); $('rExp').textContent=money(r.expenses); $('rNet').textContent=money(r.net);
+  const sob=$('shortOverBox');
+  if(sob){
+    if(r.actualCash===null){ sob.textContent='Enter counted cash'; sob.style.background='#fff'; sob.style.color='#1e40af'; }
+    else if(r.shortOver===0){ sob.textContent='✅ BALANCED — K 0.00'; sob.style.background='#dcfce7'; sob.style.color='#166534'; }
+    else if(r.shortOver<0){ sob.textContent='🔴 SHORT '+money(r.shortOver)+' — Missing!'; sob.style.background='#fee2e2'; sob.style.color='#991b1b'; }
+    else { sob.textContent='🟢 OVER '+money(r.shortOver)+' — Extra!'; sob.style.background='#fef9c3'; sob.style.color='#854d0e'; }
+  }
+  if($('cashFlowList')) $('cashFlowList').innerHTML=
+    `<div class="listrow"><span>Opening Cash</span><strong>${money(r.openingCash)}</strong></div>`+
+    `<div class="listrow"><span>Cash Received (Cash Sales + Cash Debt Payments - Cash Refunds)</span><strong class="good">+ ${money(r.cashReceived)}</strong></div>`+
+    `<div class="listrow"><span>Cash Withdrawn (Cash Expenses)</span><strong class="bad">- ${money(r.cashWithdrawn)}</strong></div>`+
+    `<div class="listrow"><span>Expected Cash In Till Now</span><strong>${money(r.cashExpected)}</strong></div>`+
+    `<div class="listrow"><span>Actual Cash Counted</span><strong>${r.actualCash===null?'Not counted yet':money(r.actualCash)}</strong></div>`+
+    `<div class="listrow" style="background:${r.shortOver===null?'#fff':r.shortOver===0?'#dcfce7':r.shortOver<0?'#fee2e2':'#fef9c3'}"><span>SHORT / OVER (Actual - Expected)</span><strong>${r.shortOver===null?'—':(r.shortOver<0?'SHORT '+money(r.shortOver):r.shortOver===0?'BALANCED': 'OVER +'+money(r.shortOver))}</strong></div>`+
+    `<div class="listrow"><span>Operating Expenses (All Methods)</span><strong class="bad">- ${money(r.expenses)}</strong></div>`;
+  $('receivedList').innerHTML=['cash','momo','bank'].map(k=>`<div class="listrow"><div><span>${METHODS[k]}</span><div class="small">in ${money(r.rec[k])} · exp ${money(r.out[k])} · refunds ${money(k==='cash'?r.refundCash:k==='momo'?r.refundMomo:r.refundBank)}</div></div><strong>${money(r.rec[k]-r.out[k]-(k==='cash'?r.refundCash:k==='momo'?r.refundMomo:r.refundBank))}</strong></div>`).join('');
+  if($('reconcileList')) $('reconcileList').innerHTML=
+    `<div class="listrow" style="background:#eff6ff"><span>💵 CASH Expected in Till (Opening + Received - Withdrawn)</span><strong>${money(r.cashExpected)}</strong></div>`+
+    `<div class="listrow" style="background:#f5f3ff"><span>📱 MOMO Expected (Opening + In - Out - Refunds)</span><strong>${money(r.momoExpected)}</strong></div>`+
+    `<div class="listrow" style="background:#fefce8"><span>🏦 BANK Expected (In - Out - Refunds)</span><strong>${money(r.bankExpected)}</strong></div>`+
+    `<div class="small" style="padding:8px">Boss: Count real cash in till. If real cash != Expected Cash, difference = missing / extra. Check voids & expenses.</div>`;
+  const top=Object.entries(r.best).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  $('bestList').innerHTML=top.map(([n,q],i)=>`<div class="listrow"><span>${i+1}. ${esc(n)}</span><strong>${q} sold</strong></div>`).join('')||'<div class="empty">No sales</div>';
+  const low=state.products.filter(p=>p.stock<=3).filter(p=>window.passesBranchForCashier(p)).filter(p=>window.passesBranch(p));
+  $('lowList').innerHTML=low.map(p=>`<div class="listrow"><span>${esc(p.name)}</span><span>${p.stock} left <button class="btn orange" onclick="restock('${p.id}')">Restock</button></span></div>`).join('')||'<div class="empty good">All stocked</div>';
+}
 function renderSales(){
   const from=$('salesFrom').value,to=$('salesTo').value;
   const all=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s)).reverse();
@@ -545,7 +627,7 @@ function exportSalesCSV(){const rows=[['Date','Receipt ID','Customer','Phone','M
 function exportStockCSV(){const rows=[['Product','Cost K','Selling price K','Profit per item K','Stock'],...state.products.map(p=>[p.name,p.cost,p.price,p.price-p.cost,p.stock])];download('guru-pos-stock.csv',rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8')}
 async function restoreBackup(){if(!await requireAdmin())return;const f=$('restoreFile').files[0];if(!f)return alert('Choose file');if(!confirm('Replace all data?'))return;try{const x=JSON.parse(await f.text());if(!x||!Array.isArray(x.products))throw new Error('Invalid backup');const keep={pinSalt:state.settings.pinSalt,pinHash:state.settings.pinHash};state=normalize({products:x.products,sales:x.sales,debts:x.debts,payments:Array.isArray(x.payments)?x.payments:[],expenses:Array.isArray(x.expenses)?x.expenses:[],settings:{...(x.settings||{}),...keep}});cart=[];if(save()){renderAll();alert('Restored.');}}catch(e){alert('Restore failed: '+e.message)}}
 async function clearAllData(){if(!await requireAdmin())return;if(!confirm('Clear all?'))return;state=normalize({products:[],sales:[],debts:[],payments:[],expenses:[],settings:state.settings});cart=[];save();renderAll();showPage('sell')}
-function printReport(){const r=reportData();showReceipt(`${state.settings.shopName} — REPORT\nBranch: ${window.getBranchFilter()}\nDate: ${dateText(new Date())}\nSales: ${money(r.total)}\nProfit: ${money(r.profit)}\nExpenses: ${money(r.expenses)}\nNET: ${money(r.net)}`)}
+function printReport(){const r=reportData();showReceipt(`${state.settings.shopName} — FINANCE REPORT\nBranch: ${window.getBranchFilter()}\nPeriod: ${r.range}\nDate: ${dateText(new Date())}\n--------------------------------\nOpening Cash: ${money(r.openingCash)}\nGross Sales: ${money(r.total)}\nRefunds/Returns: -${money(r.refunds)}\nNet Sales: ${money(r.netSales)}\nCOGS: -${money(r.cogs)}\nGROSS PROFIT: ${money(r.gross)}\nOperating Expenses: -${money(r.expenses)}\nNET PROFIT: ${money(r.net)}\n--------------------------------\nCash Received: ${money(r.cashReceived)}\nCash Withdrawn: ${money(r.cashWithdrawn)}\nExpected Cash In Till: ${money(r.cashExpected)}\nActual Cash Counted: ${r.actualCash===null?'Not counted':money(r.actualCash)}\nSHORT / OVER: ${r.shortOver===null?'—':money(r.shortOver)}\nMoMo Expected: ${money(r.momoExpected)}\nBank Expected: ${money(r.bankExpected)}\nCredit Issued: ${money(r.credit)}\nDebt Collected: ${money(r.debtIn)}`)}
 function printDebts(){const ds=state.debts.filter(d=>d.remaining>0).filter(d=>window.passesBranchForCashier(d)).filter(d=>window.passesBranch(d));showReceipt(state.settings.shopName+' — DEBT BOOK\nBranch: '+window.getBranchFilter()+'\nDate: '+dateText(new Date())+'\n\n'+(ds.map(d=>`${d.customer}: ${money(d.remaining)}`).join('\n')||'No debts')+'\n\nTotal: '+money(ds.reduce((a,d)=>a+d.remaining,0)))}
 function printSales(){const from=$('salesFrom').value,to=$('salesTo').value;const ss=state.sales.filter(s=>(!from||new Date(s.date)>=new Date(from+'T00:00:00'))&&(!to||new Date(s.date)<=new Date(to+'T23:59:59'))).filter(s=>window.passesBranchForCashier(s)).filter(s=>window.passesBranch(s)).reverse();showReceipt(state.settings.shopName+' — SALES\nBranch: '+window.getBranchFilter()+'\n'+ss.map(s=>`${dateText(s.date)} | ${s.customer} | ${money(s.total)}`).join('\n')+'\n\nTotal: '+money(ss.filter(s=>!s.voided).reduce((a,s)=>a+s.total,0)))}
 if('serviceWorker' in navigator){

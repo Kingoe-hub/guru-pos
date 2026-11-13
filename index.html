@@ -1,4 +1,8 @@
 <!doctype html>
+<!-- GURU POS v4.3 Boss AUTO: client-side hardening pass.
+     IMPORTANT: browser-side roles, PINs, Shop IDs and licence flags are NOT security boundaries.
+     Production deployment requires server-authenticated users, tenant/branch RLS, licence validation,
+     idempotent event storage and server-side role enforcement. -->
 <html lang="en-ZM">
 <head>
 <script>
@@ -19,8 +23,12 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
   const SUPABASE_KEY = 'sb_publishable__osC2SU7QjPAu_Z5jwWqDA_TdlX-AF8';
   let supabaseClient=null;
   try{ supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
-  function getPending(){ try{ return JSON.parse(localStorage.getItem('guru_pending_sync')||'[]'); }catch(e){ return []; } }
-  function setPending(arr){ localStorage.setItem('guru_pending_sync', JSON.stringify(arr)); updatePendingUI(); }
+  function pendingKey(){
+    const shopId=localStorage.getItem('guru_shopId')||'unassigned';
+    return 'guru_pending_sync_'+shopId;
+  }
+  function getPending(){ try{ const v=JSON.parse(localStorage.getItem(pendingKey())||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+  function setPending(arr){ localStorage.setItem(pendingKey(), JSON.stringify(Array.isArray(arr)?arr:[])); updatePendingUI(); }
   function addToPending(type,payload){ const a=getPending(); a.push({type, payload, at: new Date().toISOString()}); setPending(a); }
   function updatePendingUI(){
     const elInfo=document.getElementById('syncInfo');
@@ -35,33 +43,47 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
     }
   }
   async function pushToCloud(type,payload){
-    if(!supabaseClient) return false;
     const shopId=localStorage.getItem('guru_shopId');
     if(!shopId) return false;
-    if(!navigator.onLine){ addToPending(type,payload); return false; }
-    try{ 
-      const {error} = await supabaseClient.from('guru_sync').insert({shop_id: shopId, type: type, payload: payload});
+    if(!navigator.onLine || !supabaseClient){ addToPending(type,payload); return false; }
+    try{
+      const {error}=await supabaseClient.from('guru_sync').insert({
+        shop_id:shopId, type:type, payload:payload
+      });
       if(error) throw error;
       return true;
-    }catch(err){ addToPending(type,payload); return false; }
+    }catch(err){
+      console.warn('Cloud write queued for retry:',type,err);
+      addToPending(type,payload);
+      return false;
+    }
   }
+  let syncInProgress=false;
   async function flushPending(){
-    if(!supabaseClient){ alert('No supabase'); return; }
-    if(!navigator.onLine){ alert('Still offline - turn on bundles'); return; }
+    if(syncInProgress) return;
+    if(!supabaseClient){ alert('Cloud service is unavailable. Your records remain on this device.'); return; }
+    if(!navigator.onLine){ alert('Still offline. Your records remain saved on this device.'); return; }
+    const shopId=localStorage.getItem('guru_shopId');
+    if(!shopId){ alert('Sign in to a shop before syncing.'); return; }
     const pending=getPending();
     if(!pending.length){ alert('Nothing pending - all synced'); return; }
-    const shopId=localStorage.getItem('guru_shopId');
-    let ok=0, remaining=[];
-    for(let item of pending){
-      try{
-        const {error} = await supabaseClient.from('guru_sync').insert({shop_id: shopId, type: item.type, payload: item.payload});
-        if(error) throw error;
-        ok++;
-      }catch(e){ remaining.push(item); }
-    }
-    setPending(remaining);
-    if(ok>0){ alert('✅ Synced '+ok+' sales to cloud! Owner will see now'); pullLatestFromCloud(); }
-    if(remaining.length>0){ alert('❌ '+remaining.length+' failed - check Supabase'); }
+    syncInProgress=true;
+    const remaining=[];
+    let ok=0;
+    try{
+      for(const item of pending){
+        try{
+          const {error}=await supabaseClient.from('guru_sync').insert({
+            shop_id:shopId, type:item.type, payload:item.payload
+          });
+          if(error) throw error;
+          ok++;
+        }catch(e){ remaining.push(item); }
+      }
+      setPending(remaining);
+      if(ok>0) await pullLatestFromCloud();
+      alert((ok?'Synced '+ok+' queued records. ':'')+(remaining.length?remaining.length+' records still need retry.':'All queued records synced.'));
+    }finally{ syncInProgress=false; }
   }
   async function pullLatestFromCloud(){
     try{
@@ -112,6 +134,22 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
           if(!state.stockPurchases) state.stockPurchases=[];
           if(!state.stockPurchases.find(x=>x.id===d.payload.id)){ state.stockPurchases.push(d.payload); changed=true; }
         }
+        if(d.type==='expense'){
+          if(!state.expenses) state.expenses=[];
+          if(!state.expenses.find(x=>x.id===d.payload.id)){ state.expenses.push(d.payload); changed=true; }
+        }
+        if(d.type==='settings' && d.payload && typeof d.payload==='object'){
+          state.settings={...state.settings,...d.payload};
+          changed=true;
+        }
+        if(d.type==='sale_void'){
+          const sale=state.sales.find(x=>x.id===d.payload.saleId);
+          if(sale && !sale.voided){ sale.voided=true; sale.voidReason=d.payload.reason||''; sale.voidedAt=d.payload.date||new Date().toISOString(); changed=true; }
+          if(d.payload.debtId){
+            const debt=state.debts.find(x=>x.id===d.payload.debtId);
+            if(debt && !debt.voided){ debt.voided=true; debt.remaining=0; debt.paid=true; changed=true; }
+          }
+        }
       }
       if(newSales>0 || changed){ save(); renderAll(); }
       else if(latestStockRow){ save(); renderAll(); }
@@ -161,10 +199,11 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
       <button class="btn light" style="flex:1;background:#374151;color:#fff" onclick="window.genShopIdNow()">🔄 Generate ID</button>
       <button class="qr-btn" style="flex:1" onclick="alert('Boss Pro: QR Scan coming soon')">📷 Scan QR</button>
     </div>
-    <label class="small" style="margin-top:12px;display:block">PIN - 4 digits only</label>
+    <label class="small" style="margin-top:12px;display:block">Local profile PIN (4 digits)</label>
     <input id="bossPin" class="boss-input" type="tel" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="e.g. 1234">
     <button class="login-btn" onclick="window.doBossLoginNow()">Login →</button>
-    <p class="small" style="text-align:center;margin-top:12px;color:#9ca3af">Need help? WhatsApp Guru</p>
+    <p class="small" style="text-align:center;margin-top:12px;color:#fbbf24">This screen selects a local shop profile. It is not secure account authentication. Production owner/cashier access must be verified by the server.</p>
+    <p class="small" style="text-align:center;margin-top:8px;color:#9ca3af">Need help? WhatsApp Guru</p>
     <button class="btn light full" style="margin-top:8px;background:#1f2937;color:#9ca3af" onclick="window.bossLogoutNow()">Log out / Switch shop</button>
   </div>
 </div>
@@ -274,7 +313,9 @@ window.doBossLoginNow = function(){
   const shop=shopEl ? shopEl.value.trim().toUpperCase() : ''; let pin=pinEl ? pinEl.value.trim() : ''; pin=pin.replace(/\D/g,'').slice(0,4);
   if(!shop || shop.length < 6){ alert('Enter Shop ID like SHOP-GURU-123'); return; }
   if(!/^\d{4}$/.test(pin)){ alert('PIN must be exactly 4 digits. Example: 1234'); return; }
-  localStorage.setItem('guru_role', window.BOSS_ROLE || 'owner'); localStorage.setItem('guru_shopId', shop); localStorage.setItem('guru_pin', pin); localStorage.setItem('guru_current_shop', shop);
+  // Never persist the entered PIN in browser storage.
+  localStorage.removeItem('guru_pin');
+  localStorage.setItem('guru_role', window.BOSS_ROLE || 'owner'); localStorage.setItem('guru_shopId', shop); localStorage.setItem('guru_current_shop', shop);
   const branchEl=document.getElementById('branchInput'); const branch = branchEl ? branchEl.value : 'ALL';
   if(window.BOSS_ROLE==='cashier' && branch==='ALL'){ alert('Cashier cannot use ALL. Choose Branch 1, 2, 3 or 4.'); return; }
   localStorage.setItem('guru_branch', branch); localStorage.setItem('guru_branch_filter', branch);
@@ -306,7 +347,18 @@ let state=loadState(),cart=[],adminUntil=0,salesLimit=50,pinFails=0,pinLockedUnt
 function uid(){return (crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));}
 function getDBKey(){ const shop=localStorage.getItem('guru_shopId'); return shop ? 'guru_pos_v3_data_' + shop : 'guru_pos_v3_data'; }
 function normalize(x){x.products=x.products||[];x.sales=x.sales||[];x.debts=x.debts||[];x.payments=Array.isArray(x.payments)?x.payments:[];x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.stockPurchases=Array.isArray(x.stockPurchases)?x.stockPurchases:[];x.settings={...DEFAULT_SETTINGS,...(x.settings||{})};return x}
-function loadState(){try{const key=getDBKey(); const x=JSON.parse(localStorage.getItem(key)||localStorage.getItem('guru_pos_v3_data')||'null');if(x&&Array.isArray(x.products))return normalize(x);}catch(e){}return normalize({products:DEFAULT_PRODUCTS,sales:[],debts:[],payments:[],expenses:[],stockPurchases:[]});}
+function loadState(){
+  try{
+    const shop=localStorage.getItem('guru_shopId');
+    const key=getDBKey();
+    let raw=localStorage.getItem(key);
+    // Legacy migration is permitted only for the old unscoped installation.
+    if(!raw && !shop) raw=localStorage.getItem('guru_pos_v3_data');
+    const x=JSON.parse(raw||'null');
+    if(x && Array.isArray(x.products)) return normalize(x);
+  }catch(e){ console.warn('GURU POS data could not be loaded safely',e); }
+  return normalize({products:DEFAULT_PRODUCTS,sales:[],debts:[],payments:[],expenses:[],stockPurchases:[]});
+}
 function save(){try{localStorage.setItem(getDBKey(),JSON.stringify(state));return true}catch(e){alert('Could not save data.');return false}}
 function money(n){return 'K '+Number(n||0).toLocaleString('en-ZM',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function round2(n){return Math.round((Number(n)||0)*100)/100}
@@ -453,7 +505,7 @@ function reportData(){
   const out={cash:0,momo:0,bank:0}; let expenses=0; es.forEach(e=>{ out[payKey(e.method)]+=e.amount; expenses+=e.amount; });
   let stockPurchasedCash=0, stockPurchasedMomo=0, stockPurchasedBank=0, stockPurchasedTotal=0;
   (state.stockPurchases||[]).filter(sp=>withinRange(sp.date,range)).filter(sp=>window.passesBranchForCashier(sp)).filter(sp=>window.passesBranch(sp)).forEach(sp=>{ stockPurchasedTotal+=sp.amount; if(sp.method==='cash') stockPurchasedCash+=sp.amount; if(sp.method==='momo') stockPurchasedMomo+=sp.amount; if(sp.method==='bank') stockPurchasedBank+=sp.amount; });
-  const netSales=round2(total); const gross=round2(netSales - cogs); const net=round2(gross - expenses);
+  const netSales=round2(Math.max(0,total-refunds)); const gross=round2(netSales - cogs); const net=round2(gross - expenses);
   const openingCash=Number(localStorage.getItem('guru_opening_cash')||0); const openingBank=Number(localStorage.getItem('guru_opening_bank')||0);
   const actualCashRaw=localStorage.getItem('guru_actual_cash'); const actualCash=actualCashRaw===''||actualCashRaw===null?null:Number(actualCashRaw);
   const cashReceived=round2(rec.cash - refundCash); const cashWithdrawn=round2(out.cash);
@@ -469,7 +521,7 @@ function renderReports(){
   if(oc && !oc.value) oc.value=localStorage.getItem('guru_opening_cash')||'';
   if(ob && !ob.value) ob.value=localStorage.getItem('guru_opening_bank')||'';
   if(ac && !ac.value) ac.value=localStorage.getItem('guru_actual_cash')||'';
-  const customBox=document.getElementById('repCustom'); if(customBox) customBox.style.display='grid';
+  const customBox=document.getElementById('repCustom'); if(customBox) customBox.style.display=$('reportRange').value==='custom'?'grid':'none';
   if($('rOpen')) $('rOpen').textContent=money(r.openingCash);
   $('rSales').textContent=money(r.total); $('rCount').textContent=r.ss.length+' transactions';
   if($('rRefund')) $('rRefund').textContent='-'+money(r.refunds);
@@ -515,7 +567,25 @@ function renderSales(){
     return `<div class="listrow" style="align-items:flex-start"><div style="flex:1"><strong class="${s.voided?'strike':''}">${esc(s.customer)} · ${money(s.total)} · ${esc(window.branchOf(s))}</strong><div class="small" style="color:#334155;margin-top:3px">${esc(itemsText)}</div><div class="small">${esc(METHODS[methodOf(s)])} · ${dateText(s.date)}</div></div><div class="actions"><button class="btn light" onclick="showSaleReceipt('${s.id}')">Receipt</button>${s.voided?'':`<button class="btn red" onclick="voidSale('${s.id}')">Void</button>`}</div></div>`;
   }).join('')||'<div class="empty">No sales</div>';
 }
-async function voidSale(id){if(!await requireOwner('Void Sale'))return;const s=state.sales.find(s=>s.id===id);if(!s||s.voided)return;const r=await askForm('Void this sale?',[{id:'reason',label:'Reason',type:'text'}],'Void');if(!r)return;(s.cart||[]).forEach(c=>{const p=state.products.find(p=>p.id===c.id);if(p)p.stock+=c.qty});s.voided=true;save();renderAll();}
+async function voidSale(id){
+  if(!await requireOwner('Void Sale')) return;
+  const s=state.sales.find(s=>s.id===id);
+  if(!s||s.voided) return;
+  const debt=state.debts.find(d=>d.saleId===s.id);
+  if(debt && (debt.payments||[]).length){
+    alert('This credit sale has payments recorded. Do not void it here; reconcile/refund the customer balance first.');
+    return;
+  }
+  const r=await askForm('Void this sale?',[{id:'reason',label:'Reason (required)',type:'text'}],'Void');
+  if(!r || !r.reason.trim()) return alert('A void reason is required.');
+  (s.cart||[]).forEach(c=>{const p=state.products.find(p=>p.id===c.id);if(p)p.stock+=Number(c.qty||0);});
+  s.voided=true; s.voidReason=r.reason.trim(); s.voidedAt=new Date().toISOString();
+  if(debt){ debt.voided=true; debt.remaining=0; debt.paid=true; }
+  if(!save()) return;
+  await pushToCloud('sale_void',{id:uid(),saleId:s.id,debtId:debt?debt.id:null,reason:s.voidReason,date:s.voidedAt,branch:s.branch});
+  await pushToCloud('stock',state.products);
+  renderAll();
+}
 function renderDebts(){const q=($('debtSearch').value||'').toLowerCase();const ds=state.debts.filter(d=>Number(d.remaining)>0&&((d.customer||'').toLowerCase().includes(q)||(d.phone||'').includes(q))).filter(d=>window.passesBranchForCashier(d)).filter(d=>window.passesBranch(d)).sort((a,b)=>new Date(a.date)-new Date(b.date));const owed=state.debts.filter(d=>window.passesBranchForCashier(d)).filter(d=>window.passesBranch(d)).reduce((s,d)=>s+Math.max(0,Number(d.remaining)||0),0);$('debtSummary').textContent=ds.length+' customers owing · Total '+money(owed);$('debtList').innerHTML=ds.map(d=>`<div class="listrow"><div><strong>${esc(d.customer)} · ${money(d.remaining)}</strong><div class="small">${esc(d.phone||'No phone')} · Original ${money(d.total)} · ${esc(window.branchOf(d))}</div></div><div class="actions"><button class="btn green" onclick="recordPayment('${d.id}')">Payment</button><button class="btn light" onclick="remindDebt('${d.id}')">WhatsApp</button></div></div>`).join('')||'<div class="empty">No debts</div>'}
 async function recordPayment(id){
   const d=state.debts.find(d=>d.id===id);if(!d)return;
@@ -539,19 +609,85 @@ function renderExpenses(){
 $('expenseForm').addEventListener('submit',async e=>{
   e.preventDefault(); if(!await requireAdmin())return;
   const amount=round2($('eAmount').value),ds=$('eDate').value||localDate(); const date=ds===localDate()?new Date().toISOString():new Date(ds+'T12:00:00').toISOString();
-  state.expenses.push({id:uid(),date,category:$('eCat').value||'Other',amount,method:payKey($('eMethod').value),note:$('eNote').value.trim(),branch: window.getMyBranch()==='ALL' ? window.getBranchFilter() : window.getMyBranch()});
-  save(); e.target.reset(); if(!$('eDate').value) $('eDate').value=localDate(); renderExpenses(); renderAll();
+  if(!Number.isFinite(amount)||amount<=0) return alert('Enter a valid expense amount.');
+  const expense={id:uid(),date,category:$('eCat').value||'Other',amount,method:payKey($('eMethod').value),note:$('eNote').value.trim(),branch: window.getMyBranch()==='ALL' ? window.getBranchFilter() : window.getMyBranch()};
+  state.expenses.push(expense);
+  if(!save()){ state.expenses.pop(); return; }
+  await pushToCloud('expense',expense);
+  e.target.reset(); $('eDate').value=localDate(); renderExpenses(); renderAll();
 });
 function fillSettings(){ $('sName').value=state.settings.shopName||''; $('sTagline').value=state.settings.tagline||''; $('sPhone').value=state.settings.phone||''; $('sFooter').value=state.settings.footer||''; const cat=$('eCat'); if(cat && !cat.options.length){ EXP_CATS.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; cat.appendChild(o); }); } }
-$('settingsForm').addEventListener('submit',e=>{ e.preventDefault(); state.settings.shopName=$('sName').value.trim()||'GURU POS'; state.settings.tagline=$('sTagline').value.trim(); state.settings.phone=$('sPhone').value.trim(); state.settings.footer=$('sFooter').value.trim(); save(); alert('Settings saved'); renderAll(); });
-function exportBackup(){ const data=JSON.stringify(state); const blob=new Blob([data],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='guru-backup-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); state.settings.lastBackup=new Date().toISOString(); save(); }
+$('settingsForm').addEventListener('submit',async e=>{
+  e.preventDefault(); if(!await requireOwner('Change shop settings')) return;
+  state.settings.shopName=$('sName').value.trim()||'GURU POS';
+  state.settings.tagline=$('sTagline').value.trim();
+  state.settings.phone=$('sPhone').value.trim();
+  state.settings.footer=$('sFooter').value.trim();
+  if(!save()) return;
+  await pushToCloud('settings',state.settings);
+  alert('Settings saved'); renderAll();
+});
+function exportBackup(){
+  state.settings.lastBackup=new Date().toISOString();
+  if(!save()) return;
+  const data=JSON.stringify(state,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download='guru-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  renderNotice();
+}
 function shareBackup(){ exportBackup(); alert('Backup downloaded. Share it to WhatsApp / Google Drive to keep it safe.'); }
 function exportSalesCSV(){ const rows=[['date','customer','method','total','items']]; state.sales.forEach(s=>rows.push([s.date,s.customer,s.method,s.total,s.items])); downloadCSV('sales.csv',rows); }
 function exportStockCSV(){ const rows=[['name','cost','price','stock']]; state.products.forEach(p=>rows.push([p.name,p.cost,p.price,p.stock])); downloadCSV('stock.csv',rows); }
 function exportExpensesCSV(){ const rows=[['date','category','amount','method','note']]; state.expenses.forEach(x=>rows.push([x.date,x.category,x.amount,x.method,x.note])); downloadCSV('expenses.csv',rows); }
-function downloadCSV(name,rows){ const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); }
-function restoreBackup(){ const f=$('restoreFile').files[0]; if(!f) return alert('Choose file'); const rd=new FileReader(); rd.onload=()=>{ try{ const x=JSON.parse(rd.result); state=normalize(x); save(); renderAll(); alert('Restored!'); }catch(e){ alert('Bad backup file'); } }; rd.readAsText(f); }
-function clearAllData(){ if(!confirm('Clear ALL data? This cannot be undone. Backup first!')) return; localStorage.removeItem(getDBKey()); location.reload(); }
+function csvCell(value){
+  let s=String(value??'');
+  // Prevent spreadsheet formula execution for untrusted text fields.
+  if(/^[\\s\\u0000-\\u001f]*[=+@-]/.test(s)) s="'"+s;
+  return '"'+s.replace(/"/g,'""')+'"';
+}
+function downloadCSV(name,rows){
+  const csv=rows.map(r=>r.map(csvCell).join(',')).join('\\r\\n');
+  const blob=new Blob(['\\uFEFF',csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function restoreBackup(){
+  const f=$('restoreFile').files[0];
+  if(!f) return alert('Choose file');
+  if(f.size>10*1024*1024) return alert('Backup is larger than 10 MB. Contact support for help restoring it.');
+  if(!confirm('Restore this backup over the current shop data? Export a backup of the current data first.')) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const x=JSON.parse(rd.result);
+      if(!x || typeof x!=='object' || !Array.isArray(x.products) ||
+         !Array.isArray(x.sales||[]) || !Array.isArray(x.debts||[])){
+        throw new Error('Invalid backup structure');
+      }
+      const restored=normalize(x);
+      const validProducts=restored.products.every(p=>p && typeof p.id==='string' && typeof p.name==='string' &&
+        Number.isFinite(Number(p.price)) && Number(p.price)>0 && Number.isFinite(Number(p.stock)) && Number(p.stock)>=0);
+      if(!validProducts) throw new Error('Invalid product records');
+      state=restored;
+      if(!save()) throw new Error('Could not save restored data');
+      renderAll(); alert('Backup restored successfully.');
+    }catch(e){ console.error(e); alert('Backup could not be restored: '+e.message); }
+  };
+  rd.onerror=()=>alert('Could not read the selected backup file.');
+  rd.readAsText(f);
+}
+async function clearAllData(){
+  if(!await requireOwner('Clear all shop data')) return;
+  if(!confirm('Permanently clear ALL data for this shop on this device? This cannot be undone. Export a backup first.')) return;
+  localStorage.removeItem(getDBKey());
+  location.reload();
+}
 function printSales(){ let txt='SALES LIST\n'; state.sales.slice(-50).forEach(s=>{ txt+=`${dateText(s.date)} - ${s.customer} - ${money(s.total)} - ${s.method}\n`; }); printText(txt); }
 function printDebts(){ let txt='DEBT BOOK\n'; state.debts.filter(d=>d.remaining>0).forEach(d=>{ txt+=`${d.customer} - ${money(d.remaining)} - ${d.phone||''}\n`; }); printText(txt); }
 function printReport(){ const r=reportData(); let txt=`${state.settings.shopName} - REPORT ${r.range}\nSales: ${money(r.total)}\nCOGS: ${money(r.cogs)}\nGross: ${money(r.gross)}\nExpenses: ${money(r.expenses)}\nNet: ${money(r.net)}\nExpected Cash: ${money(r.cashExpected)}\nStock Purchases Cash: ${money(r.stockPurchasedCash)}\nSHORT/OVER: ${r.shortOver===null?'Not counted':money(r.shortOver)}\n`; printText(txt); }
@@ -571,6 +707,8 @@ renderAll();
 setInterval(()=>{ if(navigator.onLine) pullLatestFromCloud(); }, 15000);
 setInterval(()=>{ updatePendingUI(); }, 5000);
 if(navigator.onLine) pullLatestFromCloud();
+window.addEventListener('online',()=>{ updatePendingUI(); flushPending(); pullLatestFromCloud(); });
+window.addEventListener('offline',updatePendingUI);
 </script>
 </body>
 </html>

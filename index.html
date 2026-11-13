@@ -94,11 +94,15 @@ if(localStorage.getItem('GURU_ACTIVATED') !== 'true') { location.replace('./lice
       if(!data || !data.length) return;
       const latestStockRow = data.find(d => d.type==='stock' && Array.isArray(d.payload));
       if(latestStockRow){
-        const cloudStock = latestStockRow.payload;
-        const cloudSig = JSON.stringify(cloudStock);
-        const localSig = JSON.stringify(state.products);
-        if(cloudSig !== localSig){ state.products = cloudStock; }
-      }
+  const cloudStock = latestStockRow.payload;
+  // ONLY FIX: never overwrite local stock with old cloud stock - it erases 1st sale
+  // Only add products that are completely new on cloud, never lower local stock
+  cloudStock.forEach(cp=>{
+    if(!state.products.find(pp=>pp.id===cp.id && pp.name===cp.name)){
+      state.products.push(cp);
+    }
+  });
+}
       let newSales=0; let changed=false;
       const ordered = [...data].reverse();
       for(const d of ordered){
